@@ -11,14 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HttpRequestBuilder.swift
+//  HttpRequestProtocol.swift
 //  swift-http-client-middleware
 //
 
-import Foundation
-
-public enum HttpBody<StreamType: Equatable>: Equatable {
-    case data(Data?)
-    case stream(StreamType)
-    case none
+public protocol HttpRequestProtocol {
+    associatedtype HeadersType: HttpHeadersProtocol
+    associatedtype BodyType
 }

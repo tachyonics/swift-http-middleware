@@ -11,26 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HeadersProtocol.swift
+//  HttpHeadersProtocol.swift
 //  swift-http-client-middleware
 //
 
-public protocol HeadersProtocol: Equatable {
-    associatedtype HeaderType: HeaderProtocol
-    
-    var headers: [HeaderType] { get set }
-    
-    /// The dictionary representation of all headers.
-    ///
-    /// This representation does not preserve the current order of the instance.
-    var dictionary: [String: [String]] { get }
-
-    /// Creates an empty instance.
-    init()
-
-    /// Creates an instance from a `[String: String]`. Duplicate case-insensitive names are collapsed into the last name
-    /// and value encountered.
-    init(_ dictionary: [String: String])
+public protocol HttpHeadersProtocol: Equatable {
     
     /// Creates an instance from a `[String: [String]]`.
     init(_ dictionary: [String: [String]])
@@ -50,39 +35,25 @@ public protocol HeadersProtocol: Equatable {
     ///   - values: The `[String]` values.
     mutating func add(name: String, values: [String])
     
-    /// Case-insensitively updates the value of a `Header` by appending the new values to it or appends a `Header`
-    /// into the instance using the provided `Header`.
+    /// Case-insensitively updates the value of a `Header` by replacing the values of it or appends a `Header`
+    /// into the instance if it does not exist using the provided `Header`.
     ///
     /// - Parameters:
     ///   - header:  The `Header` to be added or updated.
-    mutating func add(_ header: HeaderType)
+    mutating func replaceOrAdd(name: String, values: [String])
     
     /// Case-insensitively updates the value of a `Header` by replacing the values of it or appends a `Header`
     /// into the instance if it does not exist using the provided `Header`.
     ///
     /// - Parameters:
     ///   - header:  The `Header` to be added or updated.
-    mutating func update(_ header: HeaderType)
-    
-    /// Case-insensitively updates the value of a `Header` by replacing the values of it or appends a `Header`
-    /// into the instance if it does not exist using the provided `Header`.
-    ///
-    /// - Parameters:
-    ///   - header:  The `Header` to be added or updated.
-    mutating func update(name: String, value: [String])
-    
-    /// Case-insensitively updates the value of a `Header` by replacing the values of it or appends a `Header`
-    /// into the instance if it does not exist using the provided `Header`.
-    ///
-    /// - Parameters:
-    ///   - header:  The `Header` to be added or updated.
-    mutating func update(name: String, value: String)
+    mutating func replaceOrAdd(name: String, value: String)
     
     /// Case-insensitively adds all `Headers` into the instance using the provided `[Headers]` array.
     ///
     /// - Parameters:
     ///   - headers:  The `Headers` object.
-    mutating func addAll(headers: Self)
+    mutating func add(contentsOf: Self)
 
     /// Case-insensitively removes a `Header`, if it exists, from the instance.
     ///
@@ -94,19 +65,16 @@ public protocol HeadersProtocol: Equatable {
     /// - Parameter name: The name of the header to search for, case-insensitively.
     ///
     /// - Returns: The values of the header, if they exist.
-    func values(for name: String) -> [String]?
-    
-    /// Case-insensitively find a header's value by name.
-    ///
-    /// - Parameter name: The name of the header to search for, case-insensitively.
-    ///
-    /// - Returns: The value of header as a comma delimited string, if it exists.
-    func value(for name: String) -> String?
-    
-    func exists(name: String) -> Bool
+    subscript(name: String) -> [String] { get }
 }
 
-public protocol HeaderProtocol: Equatable {
-    var name: String { get set }
-    var value: [String] { get set }
+public extension HttpHeadersProtocol {
+    init(_ dictionary: [String: String]) {
+        var expandedDictionary: [String: [String]] = [:]
+        dictionary.forEach { (key, value) in
+            expandedDictionary[key] = [value]
+        }
+        
+        self.init(expandedDictionary)
+    }
 }

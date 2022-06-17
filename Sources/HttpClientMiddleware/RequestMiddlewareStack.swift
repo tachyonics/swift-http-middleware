@@ -16,8 +16,7 @@
 //
 
 public struct RequestMiddlewareStack<HttpRequestType: HttpRequestProtocol,
-                                     StackOutput,
-                                     StackError> {
+                                     StackOutput> {
     
     /// returns the unique id for the operation stack as middleware
     public var id: String

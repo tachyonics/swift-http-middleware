@@ -18,15 +18,21 @@
 public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     
     public typealias HeadersType = HttpRequestType.HeadersType
-    public typealias StreamType = HttpRequestType.StreamType
+    public typealias BodyType = HttpRequestType.BodyType
+    public typealias HttpRequestProviderType =
+        (HttpMethodType, Endpoint, HeadersType, BodyType?) throws -> HttpRequestType
     
-    public init() {}
+    let httpRequestProvider: HttpRequestProviderType
+    
+    public init(httpRequestProvider: @escaping HttpRequestProviderType) {
+        self.httpRequestProvider = httpRequestProvider
+    }
 
-    var headers: HeadersType = HeadersType()
+    var headers: HeadersType = HeadersType([:])
     var methodType: HttpMethodType = .get
     var host: String = ""
     var path: String = "/"
-    var body: HttpBody<StreamType> = .none
+    var body: BodyType? = nil
     var queryItems = [URLQueryItem]()
     var port: Int16 = 443
     var protocolType: ProtocolType = .https
@@ -41,7 +47,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     // don't end up doing any chaining.
     @discardableResult
     public func withHeaders(_ value: HeadersType) -> Self {
-        self.headers.addAll(headers: value)
+        self.headers.add(contentsOf: value)
         return self
     }
     
@@ -52,8 +58,8 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     }
     
     @discardableResult
-    public func updateHeader(name: String, value: [String]) -> Self {
-        self.headers.update(name: name, value: value)
+    public func replaceOrAddHeader(name: String, values: [String]) -> Self {
+        self.headers.replaceOrAdd(name: name, values: values)
         return self
     }
     
@@ -76,7 +82,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     }
     
     @discardableResult
-    public func withBody(_ value: HttpBody<StreamType>) -> Self {
+    public func withBody(_ value: BodyType?) -> Self {
         self.body = value
         return self
     }
@@ -105,16 +111,13 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
         return self
     }
 
-    public func build() -> HttpRequestType {
+    public func build() throws -> HttpRequestType {
         let endpoint = Endpoint(host: host,
                                 path: path,
                                 port: port,
                                 queryItems: queryItems,
                                 protocolType: protocolType)
-        return HttpRequestType(method: methodType,
-                               endpoint: endpoint,
-                               headers: headers,
-                               queryItems: queryItems,
-                               body: body)
+        return try self.httpRequestProvider(
+            methodType, endpoint, headers, body)
     }
 }
