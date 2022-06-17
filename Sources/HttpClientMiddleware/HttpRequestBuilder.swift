@@ -20,7 +20,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     public typealias HeadersType = HttpRequestType.HeadersType
     public typealias BodyType = HttpRequestType.BodyType
     public typealias HttpRequestProviderType =
-        (HttpMethodType, Endpoint, HeadersType, BodyType?) throws -> HttpRequestType
+        (HttpMethod, Endpoint, HeadersType, BodyType?) throws -> HttpRequestType
     
     let httpRequestProvider: HttpRequestProviderType
     
@@ -29,7 +29,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     }
 
     var headers: HeadersType = HeadersType([:])
-    var methodType: HttpMethodType = .get
+    var methodType: HttpMethod = .GET
     var host: String = ""
     var path: String = "/"
     var body: BodyType? = nil
@@ -64,7 +64,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     }
     
     @discardableResult
-    public func withMethod(_ value: HttpMethodType) -> Self {
+    public func withMethod(_ value: HttpMethod) -> Self {
         self.methodType = value
         return self
     }
