@@ -28,7 +28,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
         self.httpRequestProvider = httpRequestProvider
     }
 
-    var headers: HeadersType = HeadersType([:])
+    var headers: HeadersType = HeadersType()
     var methodType: HttpMethod = .GET
     var host: String = ""
     var path: String = "/"

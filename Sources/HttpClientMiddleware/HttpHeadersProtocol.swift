@@ -17,8 +17,8 @@
 
 public protocol HttpHeadersProtocol: Equatable {
     
-    /// Creates an instance from a `[String: [String]]`.
-    init(_ dictionary: [String: [String]])
+    /// Creates an empty instance.
+    init()
 
     /// Case-insensitively updates or appends a `Header` into the instance using the provided `name` and `value`.
     ///
@@ -66,15 +66,4 @@ public protocol HttpHeadersProtocol: Equatable {
     ///
     /// - Returns: The values of the header, if they exist.
     subscript(name: String) -> [String] { get }
-}
-
-public extension HttpHeadersProtocol {
-    init(_ dictionary: [String: String]) {
-        var expandedDictionary: [String: [String]] = [:]
-        dictionary.forEach { (key, value) in
-            expandedDictionary[key] = [value]
-        }
-        
-        self.init(expandedDictionary)
-    }
 }
