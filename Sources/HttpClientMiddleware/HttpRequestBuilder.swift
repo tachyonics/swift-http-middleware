@@ -19,13 +19,8 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     
     public typealias HeadersType = HttpRequestType.HeadersType
     public typealias BodyType = HttpRequestType.BodyType
-    public typealias HttpRequestProviderType =
-        (HttpMethod, Endpoint, HeadersType, BodyType?) throws -> HttpRequestType
     
-    let httpRequestProvider: HttpRequestProviderType
-    
-    public init(httpRequestProvider: @escaping HttpRequestProviderType) {
-        self.httpRequestProvider = httpRequestProvider
+    public init() {
     }
 
     var headers: HeadersType = HeadersType()
@@ -117,7 +112,8 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
                                 port: port,
                                 queryItems: queryItems,
                                 protocolType: protocolType)
-        return try self.httpRequestProvider(
-            methodType, endpoint, headers, body)
+        return try HttpRequestType(
+            method: methodType, endpoint: endpoint,
+            headers: headers, body: body)
     }
 }

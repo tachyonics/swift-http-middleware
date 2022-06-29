@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  FinalizePhase.swift
+//  SecondFinalizePhase.swift
 //  swift-http-client-middleware
 //
 
@@ -22,13 +22,16 @@
 //
 // Takes Request, and returns result or error.
 //
-// Receives result or error from the deserialize transform (if present).
-public typealias FinalizePhase<HttpRequestType: HttpRequestProtocol, PhaseOutput> =
+// Receives raw response, or error from underlying handler.
+// This is the only difference from the `FinalizePhase` which receives the
+// result from the deserialise transform, providing the ability to inspect
+// or alter the raw response prior to deserialization.
+public typealias SecondFinalizePhase<HttpRequestType: HttpRequestProtocol, PhaseOutput> =
     MiddlewarePhase<HttpRequestBuilder<HttpRequestType>, PhaseOutput>
 
-public let FinalizePhaseId = "Finalize"
+public let SecondFinalizePhaseId = "SecondFinalize"
 
-public struct FinalizePhaseHandler<StackOutput, HttpRequestType: HttpRequestProtocol, HandlerType: HandlerProtocol>: HandlerProtocol
+public struct SecondFinalizePhaseHandler<StackOutput, HttpRequestType: HttpRequestProtocol, HandlerType: HandlerProtocol>: HandlerProtocol
 where HandlerType.Input == HttpRequestBuilder<HttpRequestType>, HandlerType.Output == StackOutput {
 
     public typealias Input = HttpRequestBuilder<HttpRequestType>

@@ -25,22 +25,20 @@ public struct RequestMiddlewareStack<HttpRequestType: HttpRequestProtocol,
     
     public init(id: String) {
         self.id = id
-        self.buildPhase = BuildPhase<HttpRequestType, StackOutput>(id: BuildPhaseId)
-        self.finalizePhase = FinalizePhase<HttpRequestType, StackOutput>(id: FinalizePhaseId)        
+        self.buildPhase = BuildPhase(id: BuildPhaseId)
+        self.finalizePhase = FinalizePhase(id: FinalizePhaseId)        
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware<HandlerType: HandlerProtocol>(
                                              input: HttpRequestBuilder<HttpRequestType>,
                                              next: HandlerType) async throws -> StackOutput
-    where HandlerType.Input == HttpRequestBuilder<HttpRequestType>,
-          HandlerType.Output == StackOutput {
+    where HandlerType.Input == HttpRequestBuilder<HttpRequestType>, HandlerType.Output == StackOutput {
+        let finalize = compose(next: FinalizePhaseHandler(handler: next), with: finalizePhase)
+        let build = compose(next: BuildPhaseHandler(handler: finalize), with: buildPhase)
               
-              let finalize = compose(next: FinalizePhaseHandler(handler: next), with: finalizePhase)
-              let build = compose(next: BuildPhaseHandler(handler: finalize), with: buildPhase)
-              
-              return try await build.handle(input: input)
-          }
+        return try await build.handle(input: input)
+    }
     
     mutating public func presignedRequest<HandlerType: HandlerProtocol>(
                                                       input: HttpRequestBuilder<HttpRequestType>,

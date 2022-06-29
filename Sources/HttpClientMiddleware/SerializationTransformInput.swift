@@ -11,13 +11,13 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HttpRequestProtocol.swift
+//  SerializationMiddlewareInput.swift
 //  swift-http-client-middleware
 //
 
-public protocol HttpRequestProtocol {
-    associatedtype HeadersType: HttpHeadersProtocol
-    associatedtype BodyType
-    
-    init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?) throws
+import Foundation
+
+public struct SerializationTransformInput<OperationStackInput, HttpRequestType: HttpRequestProtocol> {
+    public let operationInput: OperationStackInput
+    public let builder: HttpRequestBuilder<HttpRequestType> = HttpRequestBuilder()
 }
