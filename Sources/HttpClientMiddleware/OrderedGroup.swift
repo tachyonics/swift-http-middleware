@@ -60,15 +60,15 @@ struct RelativeOrder {
     }
 }
 
-public struct OrderedGroup<Input, Output> {
+public struct OrderedGroup<MiddlewareType: MiddlewareProtocol> {
     // order of the keys
     var order = RelativeOrder()
     // key here is name of the middleware aka the id property of the middleware
-    private var _items: [String: AnyMiddleware<Input, Output>] = [:]
+    private var _items: [String: MiddlewareType] = [:]
     
-    var orderedItems: [(key: String, value: AnyMiddleware<Input, Output>)] {
+    var orderedItems: [(key: String, value: MiddlewareType)] {
         
-        var sorted = [(key: String, value: AnyMiddleware<Input, Output>)]()
+        var sorted = [(key: String, value: MiddlewareType)]()
         for key in order.order {
             guard let value = _items[key] else {
                 continue
@@ -81,7 +81,7 @@ public struct OrderedGroup<Input, Output> {
     
     public init() {}
     
-    mutating func add(middleware: AnyMiddleware<Input, Output>,
+    mutating func add(middleware: MiddlewareType,
                       position: AbsolutePosition) {
         if !middleware.id.isEmpty {
             _items[middleware.id] = middleware
@@ -89,14 +89,14 @@ public struct OrderedGroup<Input, Output> {
         }
     }
     
-    mutating func insert(middleware: AnyMiddleware<Input, Output>,
+    mutating func insert(middleware: MiddlewareType,
                          relativeTo: String,
                          position: RelativePosition) {
         _items[middleware.id] = middleware
         order.insert(relativeTo: relativeTo, position: position, ids: middleware.id)
     }
     
-    func get(id: String)-> AnyMiddleware<Input, Output>? {
+    func get(id: String)-> MiddlewareType? {
         return _items[id]
     }
 }

@@ -15,27 +15,31 @@
 //  swift-http-client-middleware
 //
 
-public struct SerializationTransformHandler<StackInput, StackOutput, HttpRequestType: HttpRequestProtocol,
+public protocol SerializationTransformProtocol {
+    
+    func transform<InputType, HTTPRequestType>(
+        input: SerializationTransformInput<InputType, HTTPRequestType>) async throws -> HttpRequestBuilder<HTTPRequestType>
+}
+
+public struct SerializationTransformHandler<StackInput, StackOutput, HTTPRequestType: HttpRequestProtocol,
                                                           HandlerType: HandlerProtocol>: HandlerProtocol
-where HandlerType.Input == HttpRequestBuilder<HttpRequestType>, HandlerType.Output == StackOutput {
+where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == StackOutput {
 
     public typealias Input = StackInput
     
     public typealias Output = StackOutput
     
     let handler: HandlerType
-    let serializationTransform:
-        AnyTransform<SerializationTransformInput<StackInput, HttpRequestType>, HttpRequestBuilder<HttpRequestType>>
+    let serializationTransform: SerializationTransformProtocol
     
-    public init(serializationTransform:
-                    AnyTransform<SerializationTransformInput<StackInput, HttpRequestType>, HttpRequestBuilder<HttpRequestType>>,
+    public init(serializationTransform: SerializationTransformProtocol,
                 handler: HandlerType) {
         self.handler = handler
         self.serializationTransform = serializationTransform
     }
     
     public func handle(input: StackInput) async throws -> Output {
-        let serializationInput = SerializationTransformInput<StackInput, HttpRequestType>(operationInput: input)
+        let serializationInput = SerializationTransformInput<StackInput, HTTPRequestType>(operationInput: input)
         let serializationOutput = try await self.serializationTransform.transform(input: serializationInput)
         
         return try await handler.handle(input: serializationOutput)

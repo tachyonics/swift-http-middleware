@@ -11,12 +11,10 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  MiddlewareProtocol.swift
+//  HttpResponseProtocol.swift
 //  swift-http-client-middleware
 //
 
-public protocol MiddlewareProtocol {
-    
-    /// The middleware ID
-    var id: String { get }
+public protocol HttpResponseProtocol {
+    // something will go in here...
 }

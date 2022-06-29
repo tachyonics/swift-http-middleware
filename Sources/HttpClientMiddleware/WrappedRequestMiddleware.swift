@@ -11,23 +11,24 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HeadersProtocol.swift
+//  WrappedRequestMiddleware.swift
 //  swift-http-client-middleware
 //
 
 /// used to create middleware from a middleware function
-struct WrappedMiddleware<MInput, MOutput>: MiddlewareProtocol {
-    let _middleware: MiddlewareFunction<MInput, MOutput>
+struct WrappedRequestMiddleware<HTTPRequestType: HttpRequestProtocol, HTTPResponseType: HttpResponseProtocol>: RequestMiddlewareProtocol {
+    let _middleware: RequestMiddlewareFunction<HTTPRequestType, HTTPResponseType>
     var id: String
     
-    init(_ middleware: @escaping MiddlewareFunction<MInput, MOutput>, id: String) {
+    init(_ middleware: @escaping RequestMiddlewareFunction<HTTPRequestType, HTTPResponseType>, id: String) {
         self._middleware = middleware
         self.id = id
     }
     
-    func handle<H: HandlerProtocol>(input: MInput,
-                                    next: H) async throws -> MOutput where H.Input == MInput,
-                                                                     H.Output == MOutput {
+    func handle<HandlerType: HandlerProtocol>(
+        input: HttpRequestBuilder<HTTPRequestType>,
+        next: HandlerType) async throws -> HTTPResponseType
+    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
         return try await _middleware(input, next.eraseToAnyHandler())
     }
 }

@@ -11,9 +11,10 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  MiddlewareFunction.swift
+//  RequestMiddlewareFunction.swift
 //  swift-http-client-middleware
 //
 
-public typealias MiddlewareFunction<MInput, MOutput> =
-    (MInput, AnyHandler<MInput, MOutput>) async throws -> MOutput
+public typealias RequestMiddlewareFunction<HTTPRequestType: HttpRequestProtocol, HTTPResponseType: HttpResponseProtocol> =
+    (HttpRequestBuilder<HTTPRequestType>,
+     AnyHandler<HttpRequestBuilder<HTTPRequestType>, HTTPResponseType>) async throws -> HTTPResponseType

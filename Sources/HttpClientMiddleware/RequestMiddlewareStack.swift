@@ -15,62 +15,39 @@
 //  swift-http-client-middleware
 //
 
-public struct RequestMiddlewareStack<HttpRequestType: HttpRequestProtocol,
-                                     StackOutput> {
+public let BuildPhaseId = "Build"
+public let FinalizePhaseId = "Finalize"
+
+public struct RequestMiddlewareStack<HTTPRequestType: HttpRequestProtocol, HTTPResponseType: HttpResponseProtocol> {
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
-    public var buildPhase: BuildPhase<HttpRequestType, StackOutput>
-    public var finalizePhase: FinalizePhase<HttpRequestType, StackOutput>
+    public var buildPhase: RequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var finalizePhase: RequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
     public init(id: String) {
         self.id = id
-        self.buildPhase = BuildPhase(id: BuildPhaseId)
-        self.finalizePhase = FinalizePhase(id: FinalizePhaseId)        
+        self.buildPhase = RequestMiddlewarePhase(id: BuildPhaseId)
+        self.finalizePhase = RequestMiddlewarePhase(id: FinalizePhaseId)        
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware<HandlerType: HandlerProtocol>(
-                                             input: HttpRequestBuilder<HttpRequestType>,
-                                             next: HandlerType) async throws -> StackOutput
-    where HandlerType.Input == HttpRequestBuilder<HttpRequestType>, HandlerType.Output == StackOutput {
-        let finalize = compose(next: FinalizePhaseHandler(handler: next), with: finalizePhase)
-        let build = compose(next: BuildPhaseHandler(handler: finalize), with: buildPhase)
+                                             input: HttpRequestBuilder<HTTPRequestType>,
+                                             next: HandlerType) async throws -> HTTPResponseType
+    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
+        let finalize = finalizePhase.compose(next: next)
+        let build = buildPhase.compose(next: finalize)
               
         return try await build.handle(input: input)
     }
     
     mutating public func presignedRequest<HandlerType: HandlerProtocol>(
-                                                      input: HttpRequestBuilder<HttpRequestType>,
-                                                      next: HandlerType) async throws -> HttpRequestBuilder<HttpRequestType>
-    where HandlerType.Input == HttpRequestBuilder<HttpRequestType>,
-          HandlerType.Output == StackOutput {
+                                                      input: HttpRequestBuilder<HTTPRequestType>,
+                                                      next: HandlerType) async throws -> HttpRequestBuilder<HTTPRequestType>
+    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>,
+          HandlerType.Output == HTTPResponseType {
         _ = try await handleMiddleware(input: input, next: next)
         return input
-    }
-
-    /// Compose (wrap) the handler with the given middleware or essentially build out the linked list of middleware
-    private func compose<HandlerType: HandlerProtocol, MiddlewareType: MiddlewareProtocol>(
-        next handler: HandlerType,
-        with middlewares: MiddlewareType...) -> AnyHandler<HandlerType.Input, HandlerType.Output>
-    where MiddlewareType.MOutput == HandlerType.Output,
-          MiddlewareType.MInput == HandlerType.Input {
-        guard !middlewares.isEmpty,
-              let lastMiddleware = middlewares.last else {
-            return handler.eraseToAnyHandler()
-        }
-        
-        let numberOfMiddlewares = middlewares.count
-        var composedHandler = ComposedHandler(handler, lastMiddleware)
-        
-        guard numberOfMiddlewares > 1 else {
-            return composedHandler.eraseToAnyHandler()
-        }
-        let reversedCollection = (0...(numberOfMiddlewares - 2)).reversed()
-        for index in reversedCollection {
-            composedHandler = ComposedHandler(composedHandler, middlewares[index])
-        }
-        
-        return composedHandler.eraseToAnyHandler()
     }
 }

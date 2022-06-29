@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct SerializationTransformInput<OperationStackInput, HttpRequestType: HttpRequestProtocol> {
+public struct SerializationTransformInput<OperationStackInput, HTTPRequestType: HttpRequestProtocol> {
     public let operationInput: OperationStackInput
-    public let builder: HttpRequestBuilder<HttpRequestType> = HttpRequestBuilder()
+    public let builder: HttpRequestBuilder<HTTPRequestType> = HttpRequestBuilder()
 }

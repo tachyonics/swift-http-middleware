@@ -15,36 +15,43 @@
 //  swift-http-client-middleware
 //
 
-public struct DeserializationTransformHandler<HTTPResponseType, StackOutput, HttpRequestType: HttpRequestProtocol,
-                                              HandlerType: HandlerProtocol>: HandlerProtocol
-where HandlerType.Input == HttpRequestBuilder<HttpRequestType>, HandlerType.Output == HTTPResponseType {
-
-    public typealias Input = HttpRequestBuilder<HttpRequestType>
+public protocol DeserializationTransformProtocol {
     
-    public typealias Output = OperationOutput<StackOutput, HTTPResponseType>
+    func transform<HTTPResponseType, OutputType>(
+        input: HTTPResponseType) async throws -> OutputType
+}
+
+public struct DeserializationTransformHandler<HTTPResponseType, OutputType, HTTPRequestType: HttpRequestProtocol,
+                                              HandlerType: HandlerProtocol>: HandlerProtocol
+where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
+
+    public typealias Input = HttpRequestBuilder<HTTPRequestType>
+    
+    public typealias Output = OperationOutput<OutputType, HTTPResponseType>
     
     let handler: HandlerType
-    let deserializationTransform: AnyTransform<HTTPResponseType, StackOutput>
+    let deserializationTransform: DeserializationTransformProtocol
     
-    public init(handler: HandlerType,
-                deserializationTransform: AnyTransform<HTTPResponseType, StackOutput>) {
+    public init(outputType: OutputType.Type,
+                handler: HandlerType,
+                deserializationTransform: DeserializationTransformProtocol) {
         self.handler = handler
         self.deserializationTransform = deserializationTransform
     }
     
-    public func handle(input: HttpRequestBuilder<HttpRequestType>) async throws -> Output {
+    public func handle(input: HttpRequestBuilder<HTTPRequestType>) async throws -> Output {
         let httpResponse = try await handler.handle(input: input)
-        let transformOutput = try await self.deserializationTransform.transform(input: httpResponse)
+        let transformOutput: OutputType = try await self.deserializationTransform.transform(input: httpResponse)
         
         return OperationOutput(httpResponse: httpResponse, output: transformOutput)
     }
 }
 
-public struct OperationOutput<StackOutput, HTTPResponseType> {
+public struct OperationOutput<OutputType, HTTPResponseType> {
     public var httpResponse: HTTPResponseType
-    public var output: StackOutput
+    public var output: OutputType
     
-    public init(httpResponse: HTTPResponseType, output: StackOutput) {
+    public init(httpResponse: HTTPResponseType, output: OutputType) {
         self.httpResponse = httpResponse
         self.output = output
     }

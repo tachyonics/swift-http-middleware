@@ -15,10 +15,10 @@
 //  swift-http-client-middleware
 //
 
-public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
+public class HttpRequestBuilder<HTTPRequestType: HttpRequestProtocol> {
     
-    public typealias HeadersType = HttpRequestType.HeadersType
-    public typealias BodyType = HttpRequestType.BodyType
+    public typealias HeadersType = HTTPRequestType.HeadersType
+    public typealias BodyType = HTTPRequestType.BodyType
     
     public init() {
     }
@@ -32,7 +32,7 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     var port: Int16 = 443
     var protocolType: ProtocolType = .https
     
-    public var additionalRequestProperties: HttpRequestType.AdditionalRequestPropertiesType?
+    public var additionalRequestProperties: HTTPRequestType.AdditionalRequestPropertiesType?
 
     public var currentQueryItems: [URLQueryItem] {
         return queryItems
@@ -108,13 +108,13 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
         return self
     }
 
-    public func build() throws -> HttpRequestType {
+    public func build() throws -> HTTPRequestType {
         let endpoint = Endpoint(host: host,
                                 path: path,
                                 port: port,
                                 queryItems: queryItems,
                                 protocolType: protocolType)
-        return try HttpRequestType(
+        return try HTTPRequestType(
             method: methodType, endpoint: endpoint,
             headers: headers, body: body, additionalRequestProperties: additionalRequestProperties)
     }
