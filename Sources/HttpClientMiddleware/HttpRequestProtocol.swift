@@ -18,6 +18,8 @@
 public protocol HttpRequestProtocol {
     associatedtype HeadersType: HttpHeadersProtocol
     associatedtype BodyType
+    associatedtype AdditionalRequestPropertiesType
     
-    init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?) throws
+    init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?,
+         additionalRequestProperties: AdditionalRequestPropertiesType?) throws
 }

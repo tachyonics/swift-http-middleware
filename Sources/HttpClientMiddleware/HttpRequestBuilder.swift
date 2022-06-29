@@ -31,6 +31,8 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
     var queryItems = [URLQueryItem]()
     var port: Int16 = 443
     var protocolType: ProtocolType = .https
+    
+    public var additionalRequestProperties: HttpRequestType.AdditionalRequestPropertiesType?
 
     public var currentQueryItems: [URLQueryItem] {
         return queryItems
@@ -114,6 +116,6 @@ public class HttpRequestBuilder<HttpRequestType: HttpRequestProtocol> {
                                 protocolType: protocolType)
         return try HttpRequestType(
             method: methodType, endpoint: endpoint,
-            headers: headers, body: body)
+            headers: headers, body: body, additionalRequestProperties: additionalRequestProperties)
     }
 }
