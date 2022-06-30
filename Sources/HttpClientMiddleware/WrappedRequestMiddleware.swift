@@ -28,7 +28,7 @@ struct WrappedRequestMiddleware<HTTPRequestType: HttpRequestProtocol, HTTPRespon
     func handle<HandlerType: HandlerProtocol>(
         input: HttpRequestBuilder<HTTPRequestType>,
         next: HandlerType) async throws -> HTTPResponseType
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
         return try await _middleware(input, next.eraseToAnyHandler())
     }
 }

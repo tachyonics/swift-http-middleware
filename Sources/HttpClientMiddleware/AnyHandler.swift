@@ -17,19 +17,19 @@
 
 #if compiler(<5.7)
 /// Type erased Handler
-public struct AnyHandler<MInput, MOutput>: HandlerProtocol {
-    private let _handle: (MInput) async throws -> MOutput
+public struct AnyHandler<InputType, OutputType>: HandlerProtocol {
+    private let _handle: (InputType) async throws -> OutputType
     
-    public init<H: HandlerProtocol> (_ realHandler: H)
-    where H.Input == MInput, H.Output == MOutput {
-        if let alreadyErased = realHandler as? AnyHandler<MInput, MOutput> {
+    public init<HandlerType: HandlerProtocol> (_ realHandler: HandlerType)
+    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
+        if let alreadyErased = realHandler as? AnyHandler<InputType, OutputType> {
             self = alreadyErased
             return
         }
         self._handle = realHandler.handle
     }
     
-    public func handle(input: MInput) async throws -> MOutput {
+    public func handle(input: InputType) async throws -> OutputType {
         return try await _handle(input)
     }
 }

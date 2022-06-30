@@ -35,7 +35,7 @@ public struct RequestMiddlewareStack<HTTPRequestType: HttpRequestProtocol, HTTPR
     public func handleMiddleware<HandlerType: HandlerProtocol>(
                                              input: HttpRequestBuilder<HTTPRequestType>,
                                              next: HandlerType) async throws -> HTTPResponseType
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
         let finalize = finalizePhase.compose(next: next)
         let build = buildPhase.compose(next: finalize)
               
@@ -45,8 +45,8 @@ public struct RequestMiddlewareStack<HTTPRequestType: HttpRequestProtocol, HTTPR
     mutating public func presignedRequest<HandlerType: HandlerProtocol>(
                                                       input: HttpRequestBuilder<HTTPRequestType>,
                                                       next: HandlerType) async throws -> HttpRequestBuilder<HTTPRequestType>
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>,
-          HandlerType.Output == HTTPResponseType {
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>,
+          HandlerType.OutputType == HTTPResponseType {
         _ = try await handleMiddleware(input: input, next: next)
         return input
     }

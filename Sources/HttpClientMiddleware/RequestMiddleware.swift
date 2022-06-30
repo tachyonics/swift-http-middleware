@@ -23,7 +23,7 @@ public protocol RequestMiddlewareProtocol: MiddlewareProtocol {
     func handle<HandlerType: HandlerProtocol>(
         input: HttpRequestBuilder<HTTPRequestType>,
         next: HandlerType) async throws -> HTTPResponseType
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType
 }
 
 extension RequestMiddlewareProtocol {
@@ -34,7 +34,7 @@ extension RequestMiddlewareProtocol {
 #else
 public protocol RequestMiddlewareProtocol<HTTPRequestType, HTTPResponseType>: MiddlewareProtocol {
     associatedtype HTTPRequestType: HttpRequestProtocol
-    associatedtype HTTPResponseType
+    associatedtype HTTPResponseType: HttpResponseProtocol
     
     func handle<HandlerType: HandlerProtocol>(
         input: HttpRequestBuilder<HTTPRequestType>,
@@ -43,7 +43,7 @@ public protocol RequestMiddlewareProtocol<HTTPRequestType, HTTPResponseType>: Mi
 }
 
 extension RequestMiddlewareProtocol {
-    public func eraseToAnyHandler() -> any RequestMiddlewareProtocol<HTTPRequestType, HTTPResponseType> {
+    public func eraseToAnyRequestMiddleware() -> any RequestMiddlewareProtocol<HTTPRequestType, HTTPResponseType> {
         return self
     }
 }
@@ -78,8 +78,8 @@ public struct RequestMiddlewarePhase<HTTPRequestType: HttpRequestProtocol, HTTPR
     
     /// Compose (wrap) the handler with the given middleware or essentially build out the linked list of middleware
     internal func compose<HandlerType: HandlerProtocol>(
-        next: HandlerType) -> AnyHandler<HandlerType.Input, HandlerType.Output>
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
+        next: HandlerType) -> AnyHandler<HandlerType.InputType, HandlerType.OutputType>
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
         var handler = next.eraseToAnyHandler()
         let order = orderedMiddleware.orderedItems
         
@@ -107,28 +107,12 @@ struct ComposedRequestMiddlewarePhaseHandler<HTTPRequestType: HttpRequestProtoco
     
     public init<HandlerType: HandlerProtocol, MiddlewareType: RequestMiddlewareProtocol>(
         _ realNext: HandlerType, _ realWith: MiddlewareType)
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType,
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType,
           MiddlewareType.HTTPRequestType == HTTPRequestType, MiddlewareType.HTTPResponseType == HTTPResponseType
     {
         
         self.next = realNext.eraseToAnyHandler()
         self.with = realWith.eraseToAnyRequestMiddleware()
-    }
-}
-
-struct AdaptingHandler<HandlerType: HandlerProtocol, HTTPRequestType, HTTPResponseType, OutputType>: HandlerProtocol
-where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>,
-      HandlerType.Output == OperationOutput<OutputType, HTTPResponseType> {
-    typealias Input = HttpRequestBuilder<HTTPRequestType>
-    
-    typealias Output = HTTPResponseType
-    
-    let next: HandlerType
-    //let httpResponse: HTTPResponseType
-    
-    func handle(input: HttpRequestBuilder<HTTPRequestType>) async throws -> HTTPResponseType {
-        let operationOutput = try await self.next.handle(input: input)
-        return operationOutput.httpResponse
     }
 }
 

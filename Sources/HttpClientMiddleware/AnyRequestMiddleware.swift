@@ -36,7 +36,7 @@ public struct AnyRequestMiddleware<HTTPRequestType: HttpRequestProtocol, HTTPRes
     }
     
     public init<HandlerType: HandlerProtocol>(handler: HandlerType, id: String)
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == HTTPResponseType {
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
         
         self._handle = { input, handler in
             try await handler.handle(input: input)
@@ -46,11 +46,11 @@ public struct AnyRequestMiddleware<HTTPRequestType: HttpRequestProtocol, HTTPRes
 
     public func handle<HandlerType: HandlerProtocol>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>,
-          HandlerType.Output == HTTPResponseType {
+    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>,
+          HandlerType.OutputType == HTTPResponseType {
         return try await _handle(input, next.eraseToAnyHandler())
     }
 }
 #else
-public typealias AnyRequestMiddleware<MInput, MOutput> = any AnyRequestMiddleware<MInput, MOutput>
+public typealias AnyRequestMiddleware<MInput, MOutput> = any RequestMiddlewareProtocol<MInput, MOutput>
 #endif

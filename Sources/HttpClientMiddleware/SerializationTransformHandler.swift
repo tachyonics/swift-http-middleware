@@ -15,33 +15,92 @@
 //  swift-http-client-middleware
 //
 
+#if compiler(<5.7)
 public protocol SerializationTransformProtocol {
+    associatedtype HTTPRequestType: HttpRequestProtocol
+    associatedtype InputType
     
-    func transform<InputType, HTTPRequestType>(
+    func transform(
         input: SerializationTransformInput<InputType, HTTPRequestType>) async throws -> HttpRequestBuilder<HTTPRequestType>
 }
 
-public struct SerializationTransformHandler<StackInput, StackOutput, HTTPRequestType: HttpRequestProtocol,
-                                                          HandlerType: HandlerProtocol>: HandlerProtocol
-where HandlerType.Input == HttpRequestBuilder<HTTPRequestType>, HandlerType.Output == StackOutput {
+extension SerializationTransformProtocol {
+    public func eraseToAnySerializationTransform() -> AnySerializationTransform<InputType, HTTPRequestType> {
+        return AnySerializationTransform(self)
+    }
+}
 
-    public typealias Input = StackInput
+public protocol DeserializationTransformProtocol {
+    associatedtype HTTPResponseType: HttpResponseProtocol
+    associatedtype OutputType
     
-    public typealias Output = StackOutput
+    func transform(
+        input: HTTPResponseType) async throws -> OutputType
+}
+
+extension DeserializationTransformProtocol {
+    public func eraseToAnyDeserializationTransform() -> AnyDeserializationTransform<HTTPResponseType, OutputType> {
+        return AnyDeserializationTransform(self)
+    }
+}
+#else
+public protocol SerializationTransformProtocol {
+    associatedtype HTTPRequestType: HttpRequestProtocol
+    associatedtype InputType
+    
+    func transform(
+        input: SerializationTransformInput<InputType, HTTPRequestType>) async throws -> HttpRequestBuilder<HTTPRequestType>
+}
+
+extension SerializationTransformProtocol {
+    public func eraseToAnySerializationTransform() -> any SerializationTransform<InputType, HTTPRequestType> {
+        return self
+    }
+}
+
+public protocol DeserializationTransformProtocol {
+    associatedtype HTTPResponseType: HttpResponseProtocol
+    associatedtype OutputType
+    
+    func transform(
+        input: HTTPResponseType) async throws -> OutputType
+}
+
+extension SerializationTransformProtocol {
+    public func eraseToAnyDeserializationTransform() -> any DeserializationTransform<HTTPResponseType, OutputType> {
+        return self
+    }
+}
+#endif
+
+public struct SerializationTransformHandler<InputType, OutputType, HTTPRequestType: HttpRequestProtocol,
+                                            HTTPResponseType: HttpResponseProtocol, HandlerType: HandlerProtocol>: HandlerProtocol
+where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
+
+    public typealias Input = InputType
+    
+    public typealias Output = OutputType
     
     let handler: HandlerType
-    let serializationTransform: SerializationTransformProtocol
+    let serializationTransform: AnySerializationTransform<InputType, HTTPRequestType>
+    let deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType>
     
-    public init(serializationTransform: SerializationTransformProtocol,
-                handler: HandlerType) {
+    public init<SerializationTransformType: SerializationTransformProtocol, DeserializationTransformType: DeserializationTransformProtocol>(
+                serializationTransform: SerializationTransformType,
+                handler: HandlerType,
+                deserializationTransform: DeserializationTransformType)
+    where SerializationTransformType.InputType == InputType, SerializationTransformType.HTTPRequestType == HTTPRequestType,
+          DeserializationTransformType.HTTPResponseType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
         self.handler = handler
-        self.serializationTransform = serializationTransform
+        self.serializationTransform = serializationTransform.eraseToAnySerializationTransform()
+              self.deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
-    public func handle(input: StackInput) async throws -> Output {
-        let serializationInput = SerializationTransformInput<StackInput, HTTPRequestType>(operationInput: input)
+    public func handle(input: InputType) async throws -> Output {
+        let serializationInput = SerializationTransformInput<InputType, HTTPRequestType>(operationInput: input)
         let serializationOutput = try await self.serializationTransform.transform(input: serializationInput)
         
-        return try await handler.handle(input: serializationOutput)
+        let httpResponse = try await handler.handle(input: serializationOutput)
+        return try await self.deserializationTransform.transform(input: httpResponse)
     }
 }

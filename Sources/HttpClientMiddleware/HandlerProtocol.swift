@@ -17,21 +17,21 @@
 
 #if compiler(<5.7)
 public protocol HandlerProtocol {
-    associatedtype Input
-    associatedtype Output
+    associatedtype InputType
+    associatedtype OutputType
        
-    func handle(input: Input) async throws -> Output
+    func handle(input: InputType) async throws -> OutputType
 }
 
 extension HandlerProtocol {
-    public func eraseToAnyHandler() -> AnyHandler<Input, Output> {
+    public func eraseToAnyHandler() -> AnyHandler<InputType, OutputType> {
         return AnyHandler(self)
     }
 }
 #else
 public protocol HandlerProtocol<Input, Output> {
-    associatedtype Input
-    associatedtype Output
+    associatedtype InputType
+    associatedtype OutputType
        
     func handle(input: Input) async throws -> Output
 }
