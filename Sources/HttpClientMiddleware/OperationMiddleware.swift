@@ -43,7 +43,7 @@ public protocol OperationMiddlewareProtocol<InputType, OutputType>: MiddlewarePr
 }
 
 extension OperationMiddlewareProtocol {
-    public func eraseToAnyOperationMiddleware() -> any RequestMiddlewareProtocol {
+    public func eraseToAnyOperationMiddleware() -> any OperationMiddlewareProtocol {
         return self
     }
 }
@@ -60,6 +60,19 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
     
     mutating func intercept<MiddlewareType: OperationMiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
     where MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType {
+        orderedMiddleware.add(middleware: middleware.eraseToAnyOperationMiddleware(), position: position)
+    }
+    
+    /// Convenience function for passing a closure directly:
+    ///
+    /// ```
+    /// stack.intercept(position: .after, id: "Add Header") { ... }
+    /// ```
+    ///
+    mutating func intercept(position: AbsolutePosition,
+                                   id: String,
+                                   middleware: @escaping OperationMiddlewareFunction<InputType, OutputType>) {
+        let middleware = WrappedOperationMiddleware(middleware, id: id)
         orderedMiddleware.add(middleware: middleware.eraseToAnyOperationMiddleware(), position: position)
     }
     
