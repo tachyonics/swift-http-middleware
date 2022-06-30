@@ -58,7 +58,7 @@ public struct RequestMiddlewarePhase<HTTPRequestType: HttpRequestProtocol, HTTPR
         self.id = id
     }
     
-    mutating func intercept<MiddlewareType: RequestMiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
+    public mutating func intercept<MiddlewareType: RequestMiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
     where MiddlewareType.HTTPRequestType == HTTPRequestType, MiddlewareType.HTTPResponseType == HTTPResponseType {
         orderedMiddleware.add(middleware: middleware.eraseToAnyRequestMiddleware(), position: position)
     }
@@ -69,7 +69,7 @@ public struct RequestMiddlewarePhase<HTTPRequestType: HttpRequestProtocol, HTTPR
     /// stack.intercept(position: .after, id: "Add Header") { ... }
     /// ```
     ///
-    mutating func intercept(position: AbsolutePosition,
+    public mutating func intercept(position: AbsolutePosition,
                                    id: String,
                                    middleware: @escaping RequestMiddlewareFunction<HTTPRequestType, HTTPResponseType>) {
         let middleware = WrappedRequestMiddleware(middleware, id: id)

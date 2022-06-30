@@ -58,7 +58,7 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
         self.id = id
     }
     
-    mutating func intercept<MiddlewareType: OperationMiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
+    public mutating func intercept<MiddlewareType: OperationMiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
     where MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType {
         orderedMiddleware.add(middleware: middleware.eraseToAnyOperationMiddleware(), position: position)
     }
@@ -69,7 +69,7 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
     /// stack.intercept(position: .after, id: "Add Header") { ... }
     /// ```
     ///
-    mutating func intercept(position: AbsolutePosition,
+    public mutating func intercept(position: AbsolutePosition,
                                    id: String,
                                    middleware: @escaping OperationMiddlewareFunction<InputType, OutputType>) {
         let middleware = WrappedOperationMiddleware(middleware, id: id)
