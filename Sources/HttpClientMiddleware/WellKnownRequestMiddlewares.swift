@@ -15,8 +15,6 @@
 //  swift-http-client-middleware
 //
 
-import HttpClientMiddleware
-
 public protocol AcceptHeaderMiddlewareProtocol: MiddlewareProtocol {
     
 }
