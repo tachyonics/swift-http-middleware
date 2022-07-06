@@ -13,6 +13,9 @@ let package = Package(
         .library(
             name: "HttpClientMiddleware",
             targets: ["HttpClientMiddleware"]),
+        .library(
+            name: "StandardHttpClientMiddleware",
+            targets: ["StandardHttpClientMiddleware"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,8 +25,12 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "HttpClientMiddleware",
-            dependencies: []),
+            name: "HttpClientMiddleware", dependencies: [
+            ]),
+        .target(
+            name: "StandardHttpClientMiddleware", dependencies: [
+                .target(name: "HttpClientMiddleware")
+            ]),
     ],
     swiftLanguageVersions: [.v5]
 )
