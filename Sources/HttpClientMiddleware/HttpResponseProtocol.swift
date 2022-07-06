@@ -16,5 +16,5 @@
 //
 
 public protocol HttpResponseProtocol {
-    // something will go in here...
+    var statusCode: Int { get }
 }
