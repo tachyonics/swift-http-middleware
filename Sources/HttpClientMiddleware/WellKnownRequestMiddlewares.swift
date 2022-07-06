@@ -15,52 +15,98 @@
 //  swift-http-client-middleware
 //
 
-public protocol UserAgentRequestMiddlewareProtocol: RequestMiddlewareProtocol {
+public protocol AcceptHeaderMiddlewareProtocol: MiddlewareProtocol {
     
 }
 
-public extension UserAgentRequestMiddlewareProtocol {
-    var id: String {
-        "UserAgentHeader"
-    }
-}
-
-public protocol AcceptRequestMiddlewareProtocol: RequestMiddlewareProtocol {
-    
-}
-
-public extension AcceptRequestMiddlewareProtocol {
+public extension AcceptHeaderMiddlewareProtocol {
     var id: String {
         "AcceptHeader"
     }
 }
 
-public protocol RetryerRequestMiddlewareProtocol: RequestMiddlewareProtocol {
+public protocol ContentLengthMiddlewareProtocol: MiddlewareProtocol {
     
 }
 
-public extension RetryerRequestMiddlewareProtocol {
-    var id: String {
-        "Retryer"
-    }
-}
-
-public protocol ContentLengthRequestMiddlewareProtocol: RequestMiddlewareProtocol {
-    
-}
-
-public extension ContentLengthRequestMiddlewareProtocol {
+public extension ContentLengthMiddlewareProtocol {
     var id: String {
         "ContentLength"
     }
 }
 
-public protocol ContentTypeRequestMiddlewareProtocol: RequestMiddlewareProtocol {
+
+public protocol ContentTypeMiddlewareProtocol: MiddlewareProtocol {
     
 }
 
-public extension ContentTypeRequestMiddlewareProtocol {
+public extension ContentTypeMiddlewareProtocol {
     var id: String {
         "ContentType"
+    }
+}
+
+
+public protocol QueryItemMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension QueryItemMiddlewareProtocol {
+    var id: String {
+        "QueryItem"
+    }
+}
+
+
+public protocol RequestBodyMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension RequestBodyMiddlewareProtocol {
+    var id: String {
+        "RequestBody"
+    }
+}
+
+
+public protocol RequestRetryerMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension RequestRetryerMiddlewareProtocol {
+    var id: String {
+        "Retryer"
+    }
+}
+
+
+public protocol RequestURLHostMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension RequestURLHostMiddlewareProtocol {
+    var id: String {
+        "URLHost"
+    }
+}
+
+
+public protocol RequestURLPathMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension RequestURLPathMiddlewareProtocol {
+    var id: String {
+        "URLPath"
+    }
+}
+
+public protocol UserAgentHeaderMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension UserAgentHeaderMiddlewareProtocol {
+    var id: String {
+        "UserAgentHeader"
     }
 }

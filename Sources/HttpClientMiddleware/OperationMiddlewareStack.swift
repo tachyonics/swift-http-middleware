@@ -19,44 +19,43 @@ public let InitializePhaseId = "Initialize"
 
 public struct OperationMiddlewareStack<InputType, OutputType, HTTPRequestType: HttpRequestProtocol,
                                        HTTPResponseType: HttpResponseProtocol> {
-    public var _serializationTransform: AnySerializationTransform<InputType, HTTPRequestType>
     public var _deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
     public var initializePhase: OperationMiddlewarePhase<InputType, OutputType>
-    public var buildPhase: RequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
-    public var finalizePhase: RequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var serializeInputPhase: SerializeInputMiddlewarePhase<InputType, HTTPRequestType, HTTPResponseType>
+    public var buildPhase: BuildRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var finalizePhase: FinalizeRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
-    public init<SerializationTransformType: SerializationTransformProtocol, DeserializationTransformType: DeserializationTransformProtocol>(
-        id: String, serializationTransform: SerializationTransformType, deserializationTransform: DeserializationTransformType)
-    where SerializationTransformType.InputType == InputType, SerializationTransformType.HTTPRequestType == HTTPRequestType,
-          DeserializationTransformType.HTTPResponseType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+    public init<DeserializationTransformType: DeserializationTransformProtocol>(
+        id: String, deserializationTransform: DeserializationTransformType)
+    where DeserializationTransformType.HTTPResponseType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
         self.id = id
         self.initializePhase = OperationMiddlewarePhase(id: InitializePhaseId)
-        self.buildPhase = RequestMiddlewarePhase(id: BuildPhaseId)
-        self.finalizePhase = RequestMiddlewarePhase(id: FinalizePhaseId)
-        self._serializationTransform = serializationTransform.eraseToAnySerializationTransform()
+        self.buildPhase = BuildRequestMiddlewarePhase(id: BuildPhaseId)
+        self.finalizePhase = FinalizeRequestMiddlewarePhase(id: FinalizePhaseId)
+        self.serializeInputPhase = SerializeInputMiddlewarePhase(id: SerializeInputPhaseId)
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware<HandlerType: HandlerProtocol>(input: InputType,
                                                                next: HandlerType) async throws -> OutputType
-    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
+    where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
         let finalize = finalizePhase.compose(next: next)
-        let build = buildPhase.compose(next: finalize)
-        let serialize = SerializationTransformHandler(serializationTransform: self._serializationTransform,
-                                                      handler: build,
+        let build = buildPhase.compose(next: FinalizePhaseHandler(handler: finalize))
+        let serializeInput = serializeInputPhase.compose(next: SerializeInputPhaseHandler(handler: build))
+        let transform = SerializationTransformHandler(handler: serializeInput,
                                                       deserializationTransform: self._deserializationTransform)
-        let initialize = initializePhase.compose(next: serialize)
+        let initialize = initializePhase.compose(next: transform)
               
         return try await initialize.handle(input: input)
     }
     
     mutating public func presignedRequest<HandlerType: HandlerProtocol>(input: InputType,
                                                                         next: HandlerType) async throws -> InputType
-    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
+    where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
         _ = try await handleMiddleware(input: input, next: next)
         return input
     }

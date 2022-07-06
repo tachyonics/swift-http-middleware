@@ -15,29 +15,26 @@
 //  swift-http-client-middleware
 //
 
-public let BuildPhaseId = "Build"
-public let FinalizePhaseId = "Finalize"
-
 public struct RequestMiddlewareStack<HTTPRequestType: HttpRequestProtocol, HTTPResponseType: HttpResponseProtocol> {
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
-    public var buildPhase: RequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
-    public var finalizePhase: RequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var buildPhase: BuildRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var finalizePhase: FinalizeRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
     public init(id: String) {
         self.id = id
-        self.buildPhase = RequestMiddlewarePhase(id: BuildPhaseId)
-        self.finalizePhase = RequestMiddlewarePhase(id: FinalizePhaseId)        
+        self.buildPhase = BuildRequestMiddlewarePhase(id: BuildPhaseId)
+        self.finalizePhase = FinalizeRequestMiddlewarePhase(id: FinalizePhaseId)        
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware<HandlerType: HandlerProtocol>(
                                              input: HttpRequestBuilder<HTTPRequestType>,
                                              next: HandlerType) async throws -> HTTPResponseType
-    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
+    where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
         let finalize = finalizePhase.compose(next: next)
-        let build = buildPhase.compose(next: finalize)
+        let build = buildPhase.compose(next: FinalizePhaseHandler(handler: finalize))
               
         return try await build.handle(input: input)
     }
@@ -45,7 +42,7 @@ public struct RequestMiddlewareStack<HTTPRequestType: HttpRequestProtocol, HTTPR
     mutating public func presignedRequest<HandlerType: HandlerProtocol>(
                                                       input: HttpRequestBuilder<HTTPRequestType>,
                                                       next: HandlerType) async throws -> HttpRequestBuilder<HTTPRequestType>
-    where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>,
+    where HandlerType.InputType == HTTPRequestType,
           HandlerType.OutputType == HTTPResponseType {
         _ = try await handleMiddleware(input: input, next: next)
         return input

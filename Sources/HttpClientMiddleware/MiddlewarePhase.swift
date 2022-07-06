@@ -11,46 +11,12 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  OperationMiddleware.swift
+//  MiddlewarePhase.swift
 //  swift-http-client-middleware
 //
 
-#if compiler(<5.7)
-public protocol OperationMiddlewareProtocol: MiddlewareProtocol {
-    associatedtype InputType
-    associatedtype OutputType
-    
-    func handle<HandlerType: HandlerProtocol>(
-        input: InputType,
-        next: HandlerType) async throws -> OutputType
-    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType
-}
-
-extension OperationMiddlewareProtocol {
-    public func eraseToAnyOperationMiddleware() -> AnyOperationMiddleware<InputType, OutputType> {
-        return AnyOperationMiddleware(self)
-    }
-}
-#else
-public protocol OperationMiddlewareProtocol<InputType, OutputType>: MiddlewareProtocol {
-    associatedtype InputType
-    associatedtype OutputType
-    
-    func handle<HandlerType: HandlerProtocol>(
-        input: InputType,
-        next: HandlerType) async throws -> OutputType
-    where HandlerType.Input == InputType, HandlerType.Output == OutputType
-}
-
-extension OperationMiddlewareProtocol {
-    public func eraseToAnyOperationMiddleware() -> any OperationMiddlewareProtocol {
-        return self
-    }
-}
-#endif
-
-public struct OperationMiddlewarePhase<InputType, OutputType> {
-    var orderedMiddleware: OrderedGroup<AnyOperationMiddleware<InputType, OutputType>> = OrderedGroup()
+public struct MiddlewarePhase<InputType, OutputType> {
+    var orderedMiddleware: OrderedGroup<AnyMiddleware<InputType, OutputType>> = OrderedGroup()
     
     public let id: String
     
@@ -58,9 +24,9 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
         self.id = id
     }
     
-    public mutating func intercept<MiddlewareType: OperationMiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
+    public mutating func intercept<MiddlewareType: MiddlewareProtocol>(position: AbsolutePosition, middleware: MiddlewareType)
     where MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType {
-        orderedMiddleware.add(middleware: middleware.eraseToAnyOperationMiddleware(), position: position)
+        orderedMiddleware.add(middleware: middleware.eraseToAnyMiddleware(), position: position)
     }
     
     /// Convenience function for passing a closure directly:
@@ -71,9 +37,9 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
     ///
     public mutating func intercept(position: AbsolutePosition,
                                    id: String,
-                                   middleware: @escaping OperationMiddlewareFunction<InputType, OutputType>) {
-        let middleware = WrappedOperationMiddleware(middleware, id: id)
-        orderedMiddleware.add(middleware: middleware.eraseToAnyOperationMiddleware(), position: position)
+                                   middleware: @escaping MiddlewareFunction<InputType, OutputType>) {
+        let middleware = WrappedMiddleware(middleware, id: id)
+        orderedMiddleware.add(middleware: middleware.eraseToAnyMiddleware(), position: position)
     }
     
     /// Compose (wrap) the handler with the given middleware or essentially build out the linked list of middleware
@@ -89,7 +55,7 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
         let numberOfMiddlewares = order.count
         let reversedCollection = (0...(numberOfMiddlewares-1)).reversed()
         for index in reversedCollection {
-            let composedHandler = ComposedOperationMiddlewarePhaseHandler(handler, order[index].value)
+            let composedHandler = ComposedMiddlewarePhaseHandler(handler, order[index].value)
             handler = composedHandler.eraseToAnyHandler()
         }
         
@@ -98,25 +64,25 @@ public struct OperationMiddlewarePhase<InputType, OutputType> {
 }
 
 // handler chain, used to decorate a handler with middleware
-struct ComposedOperationMiddlewarePhaseHandler<InputType, OutputType> {
+struct ComposedMiddlewarePhaseHandler<InputType, OutputType> {
     // the next handler to call
     let next: AnyHandler<InputType, OutputType>
     
     // the middleware decorating 'next'
-    let with: AnyOperationMiddleware<InputType, OutputType>
+    let with: AnyMiddleware<InputType, OutputType>
     
-    public init<HandlerType: HandlerProtocol, MiddlewareType: OperationMiddlewareProtocol>(
+    public init<HandlerType: HandlerProtocol, MiddlewareType: MiddlewareProtocol>(
         _ realNext: HandlerType, _ realWith: MiddlewareType)
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType,
           MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType
     {
         
         self.next = realNext.eraseToAnyHandler()
-        self.with = realWith.eraseToAnyOperationMiddleware()
+        self.with = realWith.eraseToAnyMiddleware()
     }
 }
 
-extension ComposedOperationMiddlewarePhaseHandler: HandlerProtocol {
+extension ComposedMiddlewarePhaseHandler: HandlerProtocol {
     public func handle(input: InputType) async throws -> OutputType {
         return try await with.handle(input: input, next: next)
     }

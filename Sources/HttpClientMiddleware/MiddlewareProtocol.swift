@@ -15,8 +15,42 @@
 //  swift-http-client-middleware
 //
 
+#if compiler(<5.7)
 public protocol MiddlewareProtocol {
+    associatedtype InputType
+    associatedtype OutputType
     
     /// The middleware ID
     var id: String { get }
+    
+    func handle<HandlerType: HandlerProtocol>(
+        input: InputType,
+        next: HandlerType) async throws -> OutputType
+    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType
 }
+
+extension MiddlewareProtocol {
+    public func eraseToAnyMiddleware() -> AnyMiddleware<InputType, OutputType> {
+        return AnyMiddleware(self)
+    }
+}
+#else
+public protocol MiddlewareProtocol<HTTPRequestType, HTTPResponseType> {
+    associatedtype InputType
+    associatedtype OutputType
+    
+    /// The middleware ID
+    var id: String { get }
+    
+    func handle<HandlerType: HandlerProtocol>(
+        input: InputType,
+        next: HandlerType) async throws -> OutputType
+    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType
+}
+
+extension MiddlewareProtocol {
+    public func eraseToAnyMiddleware() -> any MiddlewareProtocol<HTTPRequestType, HTTPResponseType> {
+        return self
+    }
+}
+#endif

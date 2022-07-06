@@ -11,22 +11,22 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  AnyOperationMiddleware.swift
+//  AnyMiddleware.swift
 //  swift-http-client-middleware
 //
 
 #if compiler(<5.7)
 /// type erase the Middleware protocol
-public struct AnyOperationMiddleware<InputType, OutputType>: OperationMiddlewareProtocol {
+public struct AnyMiddleware<InputType, OutputType>: MiddlewareProtocol {
     
     private let _handle: (InputType,
                           AnyHandler<InputType, OutputType>) async throws -> OutputType
 
     public var id: String
 
-    public init<MiddlewareType: OperationMiddlewareProtocol>(_ realMiddleware: MiddlewareType)
+    public init<MiddlewareType: MiddlewareProtocol>(_ realMiddleware: MiddlewareType)
     where MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType {
-        if let alreadyErased = realMiddleware as? AnyOperationMiddleware {
+        if let alreadyErased = realMiddleware as? AnyMiddleware {
             self = alreadyErased
             return
         }
@@ -52,5 +52,5 @@ public struct AnyOperationMiddleware<InputType, OutputType>: OperationMiddleware
     }
 }
 #else
-public typealias AnyOperationMiddleware<MInput, MOutput> = any OperationMiddlewareProtocol<MInput, MOutput>
+public typealias AnyMiddleware<MInput, MOutput> = any MiddlewareProtocol<MInput, MOutput>
 #endif

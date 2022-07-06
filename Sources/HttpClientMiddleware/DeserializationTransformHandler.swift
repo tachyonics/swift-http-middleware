@@ -11,25 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  SerializationTransformHandler.swift
+//  DeserializationTransformHandler.swift
 //  swift-http-client-middleware
 //
 
 #if compiler(<5.7)
-public protocol SerializationTransformProtocol {
-    associatedtype HTTPRequestType: HttpRequestProtocol
-    associatedtype InputType
-    
-    func transform(
-        input: SerializationTransformInput<InputType, HTTPRequestType>) async throws -> HttpRequestBuilder<HTTPRequestType>
-}
-
-extension SerializationTransformProtocol {
-    public func eraseToAnySerializationTransform() -> AnySerializationTransform<InputType, HTTPRequestType> {
-        return AnySerializationTransform(self)
-    }
-}
-
 public protocol DeserializationTransformProtocol {
     associatedtype HTTPResponseType: HttpResponseProtocol
     associatedtype OutputType
@@ -44,20 +30,6 @@ extension DeserializationTransformProtocol {
     }
 }
 #else
-public protocol SerializationTransformProtocol {
-    associatedtype HTTPRequestType: HttpRequestProtocol
-    associatedtype InputType
-    
-    func transform(
-        input: SerializationTransformInput<InputType, HTTPRequestType>) async throws -> HttpRequestBuilder<HTTPRequestType>
-}
-
-extension SerializationTransformProtocol {
-    public func eraseToAnySerializationTransform() -> any SerializationTransform<InputType, HTTPRequestType> {
-        return self
-    }
-}
-
 public protocol DeserializationTransformProtocol {
     associatedtype HTTPResponseType: HttpResponseProtocol
     associatedtype OutputType
@@ -75,32 +47,27 @@ extension SerializationTransformProtocol {
 
 public struct SerializationTransformHandler<InputType, OutputType, HTTPRequestType: HttpRequestProtocol,
                                             HTTPResponseType: HttpResponseProtocol, HandlerType: HandlerProtocol>: HandlerProtocol
-where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
+where HandlerType.InputType == SerializeInputMiddlewarePhaseInput<InputType, HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
 
     public typealias Input = InputType
     
     public typealias Output = OutputType
     
     let handler: HandlerType
-    let serializationTransform: AnySerializationTransform<InputType, HTTPRequestType>
     let deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType>
     
-    public init<SerializationTransformType: SerializationTransformProtocol, DeserializationTransformType: DeserializationTransformProtocol>(
-                serializationTransform: SerializationTransformType,
+    public init<DeserializationTransformType: DeserializationTransformProtocol>(
                 handler: HandlerType,
                 deserializationTransform: DeserializationTransformType)
-    where SerializationTransformType.InputType == InputType, SerializationTransformType.HTTPRequestType == HTTPRequestType,
-          DeserializationTransformType.HTTPResponseType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+    where DeserializationTransformType.HTTPResponseType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
         self.handler = handler
-        self.serializationTransform = serializationTransform.eraseToAnySerializationTransform()
-              self.deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
+        self.deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
     public func handle(input: InputType) async throws -> Output {
-        let serializationInput = SerializationTransformInput<InputType, HTTPRequestType>(operationInput: input)
-        let serializationOutput = try await self.serializationTransform.transform(input: serializationInput)
+        let serializationInput = SerializeInputMiddlewarePhaseInput<InputType, HTTPRequestType>(input: input)
         
-        let httpResponse = try await handler.handle(input: serializationOutput)
+        let httpResponse = try await handler.handle(input: serializationInput)
         return try await self.deserializationTransform.transform(input: httpResponse)
     }
 }

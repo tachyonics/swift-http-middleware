@@ -11,16 +11,16 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  WrappedOperationMiddleware.swift
+//  WrappedMiddleware.swift
 //  swift-http-client-middleware
 //
 
 /// used to create middleware from a middleware function
-struct WrappedOperationMiddleware<InputType, OutputType>: OperationMiddlewareProtocol {
-    let _middleware: OperationMiddlewareFunction<InputType, OutputType>
+struct WrappedMiddleware<InputType, OutputType>: MiddlewareProtocol {
+    let _middleware: MiddlewareFunction<InputType, OutputType>
     var id: String
     
-    init(_ middleware: @escaping OperationMiddlewareFunction<InputType, OutputType>, id: String) {
+    init(_ middleware: @escaping MiddlewareFunction<InputType, OutputType>, id: String) {
         self._middleware = middleware
         self.id = id
     }

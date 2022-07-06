@@ -11,13 +11,9 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  SerializationMiddlewareInput.swift
+//  MiddlewareFunction.swift
 //  swift-http-client-middleware
 //
 
-import Foundation
-
-public struct SerializationTransformInput<OperationStackInput, HTTPRequestType: HttpRequestProtocol> {
-    public let operationInput: OperationStackInput
-    public let builder: HttpRequestBuilder<HTTPRequestType> = HttpRequestBuilder()
-}
+public typealias MiddlewareFunction<InputType, OutputType> =
+    (InputType, AnyHandler<InputType, OutputType>) async throws -> OutputType
