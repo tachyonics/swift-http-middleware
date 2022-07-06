@@ -19,20 +19,18 @@ public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpRequestProtocol
     public typealias InputType = HttpRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
-    private let omitHeaderForZeroOrUnknownSizedBody: Bool
+    private let omitHeaderForZeroLengthBody: Bool
     
-    public init(omitHeaderForZeroOrUnknownSizedBody: Bool) {
-        self.omitHeaderForZeroOrUnknownSizedBody = omitHeaderForZeroOrUnknownSizedBody
+    public init(omitHeaderForZeroLengthBody: Bool) {
+        self.omitHeaderForZeroLengthBody = omitHeaderForZeroLengthBody
     }
     
     public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
     where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
-    HTTPResponseType == HandlerType.OutputType {
-        let effectiveBodySize = input.knownBodySize ?? 0
-        
-        if effectiveBodySize != 0 || !self.omitHeaderForZeroOrUnknownSizedBody {
-            input.withHeader(name: "Content-Length", value: "\(effectiveBodySize)")
+    HTTPResponseType == HandlerType.OutputType {        
+        if let knownLength = input.body?.knownLength, knownLength != 0 || !self.omitHeaderForZeroLengthBody {
+            input.withHeader(name: "Content-Length", value: "\(knownLength)")
         }
         
         return try await next.handle(input: input)

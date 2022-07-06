@@ -20,21 +20,19 @@ public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
     public typealias OutputType = HTTPResponseType
     
     private let contentType: String
-    private let omitHeaderForZeroOrUnknownSizedBody: Bool
+    private let omitHeaderForZeroLengthBody: Bool
     
     public init(contentType: String,
-                omitHeaderForZeroOrUnknownSizedBody: Bool) {
+                omitHeaderForZeroLengthBody: Bool) {
         self.contentType = contentType
-        self.omitHeaderForZeroOrUnknownSizedBody = omitHeaderForZeroOrUnknownSizedBody
+        self.omitHeaderForZeroLengthBody = omitHeaderForZeroLengthBody
     }
     
     public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
     where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
-        let effectiveBodySize = input.knownBodySize ?? 0
-        
-        if effectiveBodySize != 0 || !self.omitHeaderForZeroOrUnknownSizedBody {
+        if input.body?.knownLength != 0 || !self.omitHeaderForZeroLengthBody {
             input.withHeader(name: "Content-Type", value: self.contentType)
         }
         

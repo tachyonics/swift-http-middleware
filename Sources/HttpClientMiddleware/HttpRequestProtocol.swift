@@ -26,5 +26,5 @@ public protocol HttpRequestProtocol {
 
 public protocol HTTPBodyProtocol {
     // can return nil if the body size cannot be computed
-    var knownSize: Int? { get }
+    var knownLength: Int? { get }
 }

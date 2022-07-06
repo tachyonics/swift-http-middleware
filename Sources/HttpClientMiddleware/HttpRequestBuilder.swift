@@ -23,14 +23,14 @@ public class HttpRequestBuilder<HTTPRequestType: HttpRequestProtocol> {
     public init() {
     }
 
-    var headers: HeadersType = HeadersType()
-    var methodType: HttpMethod = .GET
-    var host: String = ""
-    var path: String = "/"
-    var body: BodyType? = nil
-    var queryItems = [URLQueryItem]()
-    var port: Int16 = 443
-    var protocolType: ProtocolType = .https
+    public private(set) var headers: HeadersType = HeadersType()
+    public private(set) var methodType: HttpMethod = .GET
+    public private(set) var host: String = ""
+    public private(set) var path: String = "/"
+    public private(set) var body: BodyType? = nil
+    public private(set) var queryItems = [URLQueryItem]()
+    public private(set) var port: Int16 = 443
+    public private(set) var protocolType: ProtocolType = .https
     
     public var additionalRequestProperties: HTTPRequestType.AdditionalRequestPropertiesType?
 
@@ -106,10 +106,6 @@ public class HttpRequestBuilder<HTTPRequestType: HttpRequestProtocol> {
     public func withProtocol(_ value: ProtocolType) -> Self {
         self.protocolType = value
         return self
-    }
-    
-    public var knownBodySize: Int? {
-        return self.body?.knownSize
     }
 
     public func build() throws -> HTTPRequestType {
