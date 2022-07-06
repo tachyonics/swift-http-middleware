@@ -14,17 +14,14 @@
 
 import HttpClientMiddleware
 
-public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                          HTTPResponseType: HttpResponseProtocol>: ContentTypeMiddlewareProtocol {
+public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
+                                            HTTPResponseType: HttpResponseProtocol>: ContentLengthMiddlewareProtocol {
     public typealias InputType = HttpRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
-    private let contentType: String
     private let omitHeaderForZeroOrUnknownSizedBody: Bool
     
-    public init(contentType: String,
-                omitHeaderForZeroOrUnknownSizedBody: Bool) {
-        self.contentType = contentType
+    public init(omitHeaderForZeroOrUnknownSizedBody: Bool) {
         self.omitHeaderForZeroOrUnknownSizedBody = omitHeaderForZeroOrUnknownSizedBody
     }
     
@@ -35,7 +32,7 @@ public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
         let effectiveBodySize = input.knownBodySize ?? 0
         
         if effectiveBodySize != 0 || !self.omitHeaderForZeroOrUnknownSizedBody {
-            input.withHeader(name: "Content-Type", value: self.contentType)
+            input.withHeader(name: "Content-Length", value: "\(effectiveBodySize)")
         }
         
         return try await next.handle(input: input)

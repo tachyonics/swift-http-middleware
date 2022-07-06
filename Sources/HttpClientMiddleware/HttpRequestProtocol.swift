@@ -17,9 +17,14 @@
 
 public protocol HttpRequestProtocol {
     associatedtype HeadersType: HttpHeadersProtocol
-    associatedtype BodyType
+    associatedtype BodyType: HTTPBodyProtocol
     associatedtype AdditionalRequestPropertiesType
     
     init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?,
          additionalRequestProperties: AdditionalRequestPropertiesType?) throws
+}
+
+public protocol HTTPBodyProtocol {
+    // can return nil if the body size cannot be computed
+    var knownSize: Int? { get }
 }

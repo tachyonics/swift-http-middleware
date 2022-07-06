@@ -107,6 +107,10 @@ public class HttpRequestBuilder<HTTPRequestType: HttpRequestProtocol> {
         self.protocolType = value
         return self
     }
+    
+    public var knownBodySize: Int? {
+        return self.body?.knownSize
+    }
 
     public func build() throws -> HTTPRequestType {
         let endpoint = Endpoint(host: host,
