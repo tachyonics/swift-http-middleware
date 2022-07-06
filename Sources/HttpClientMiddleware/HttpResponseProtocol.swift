@@ -16,5 +16,5 @@
 //
 
 public protocol HttpResponseProtocol {
-    var statusCode: Int { get }
+    var statusCode: UInt { get }
 }
