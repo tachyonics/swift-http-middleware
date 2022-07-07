@@ -14,8 +14,13 @@
 
 import HttpClientMiddleware
 
+public enum RequestRetryerErrorCause<HTTPResponseType: HttpResponseProtocol> {
+    case response(HTTPResponseType)
+    case error(Swift.Error)
+}
+
 public enum RequestRetryerError<HTTPResponseType: HttpResponseProtocol>: Error {
-    case maximumRetryAttemptsExceeded(attemptCount: Int, mostRecentResponse: HTTPResponseType?, mostRecentError: Swift.Error?)
+    case maximumRetryAttemptsExceeded(attemptCount: Int, cause: RequestRetryerErrorCause<HTTPResponseType>)
 }
 
 public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
@@ -38,20 +43,20 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
     HTTPResponseType == HandlerType.OutputType {
         return try await handle(input: input, next: next,
                                 retriesRemaining: self.retryConfiguration.numRetries,
-                                mostRecentResponse: nil,
-                                mostRecentError: nil)
+                                mostRecentFailure: nil)
     }
     
     private func handle<HandlerType>(input: HTTPRequestType, next: HandlerType,
-                                     retriesRemaining: Int, mostRecentResponse: HTTPResponseType?,
-                                     mostRecentError: Swift.Error?) async throws
+                                     retriesRemaining: Int,
+                                     mostRecentFailure: RequestRetryerErrorCause<HTTPResponseType>?) async throws
     -> HTTPResponseType
     where HandlerType : HandlerProtocol, HTTPRequestType == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
-        guard retriesRemaining > 0 else {
-            throw RequestRetryerError.maximumRetryAttemptsExceeded(attemptCount: self.retryConfiguration.numRetries,
-                                                                   mostRecentResponse: mostRecentResponse,
-                                                                   mostRecentError: mostRecentError)
+        if let mostRecentFailure = mostRecentFailure {
+            guard retriesRemaining > 0 else {
+                throw RequestRetryerError.maximumRetryAttemptsExceeded(attemptCount: self.retryConfiguration.numRetries,
+                                                                       cause: mostRecentFailure)
+            }
         }
         
         do {
@@ -61,12 +66,12 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
             case 500...599:
                 // server error, retry
                 return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1,
-                                        mostRecentResponse: response, mostRecentError: nil)
+                                        mostRecentFailure: .response(response))
             default:
                 return response
             }
         } catch let error where self.canRetryErrorFunction(error) {
-            return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1, mostRecentResponse: nil, mostRecentError: error)
+            return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1, mostRecentFailure: .error(error))
         }
     }
 }
