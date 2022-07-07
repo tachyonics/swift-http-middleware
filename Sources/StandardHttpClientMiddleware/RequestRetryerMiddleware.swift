@@ -64,6 +64,8 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
             
             switch response.statusCode {
             case 500...599:
+                try await self.retryConfiguration.waitForNextRetry(retriesRemaining: retriesRemaining)
+                
                 // server error, retry
                 return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1,
                                         mostRecentResult: .response(response))
@@ -75,6 +77,8 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
             let result: RequestRetryerResult<HTTPResponseType> = .error(cause: error, code: status.code)
             
             if status.isRetriable {
+                try await self.retryConfiguration.waitForNextRetry(retriesRemaining: retriesRemaining)
+                
                 return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1, mostRecentResult: result)
             }
             

@@ -18,7 +18,8 @@
 import Foundation
 
 /// Type alias for a retry interval.
-public typealias RetryInterval = UInt32
+public typealias RetryInterval = UInt64
+private let millisecondsToNanoSeconds: UInt64 = 1000000
 
 /**
  Retry configuration for the requests made by a HTTPClient.
@@ -67,6 +68,16 @@ public struct HTTPClientRetryConfiguration {
         }
         
         return boundedMsInterval
+    }
+    
+    @discardableResult
+    public func waitForNextRetry(retriesRemaining: Int) async throws -> RetryInterval {
+        // determine the required interval
+        let retryInterval = getRetryInterval(retriesRemaining: retriesRemaining)
+        
+        try await Task.sleep(nanoseconds: retryInterval * millisecondsToNanoSeconds)
+        
+        return retryInterval
     }
  
     /// Default try configuration with 5 retries starting at 500 ms interval.
