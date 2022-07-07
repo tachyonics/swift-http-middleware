@@ -16,7 +16,7 @@ import HttpClientMiddleware
 
 public enum RequestRetryerResult<HTTPResponseType: HttpResponseProtocol> {
     case response(HTTPResponseType)
-    case error(cause: Swift.Error, code: Int)
+    case error(cause: Swift.Error, code: UInt)
 }
 
 public enum RequestRetryerError<HTTPResponseType: HttpResponseProtocol>: Error {
@@ -29,10 +29,10 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
     public typealias OutputType = HTTPResponseType
     
     private let retryConfiguration: HTTPClientRetryConfiguration
-    private let errorStatusFunction: (Swift.Error) -> (isRetriable: Bool, code: Int)
+    private let errorStatusFunction: (Swift.Error) -> (isRetriable: Bool, code: UInt)
     
     public init(retryConfiguration: HTTPClientRetryConfiguration,
-                errorStatusFunction: @escaping (Swift.Error) -> (isRetriable: Bool, code: Int)) {
+                errorStatusFunction: @escaping (Swift.Error) -> (isRetriable: Bool, code: UInt)) {
         self.retryConfiguration = retryConfiguration
         self.errorStatusFunction = errorStatusFunction
     }
