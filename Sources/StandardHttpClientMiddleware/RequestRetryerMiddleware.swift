@@ -16,7 +16,7 @@ import HttpClientMiddleware
 
 public enum RequestRetryerResult<HTTPResponseType: HttpResponseProtocol> {
     case response(HTTPResponseType)
-    case error(Swift.Error)
+    case error(cause: Swift.Error, code: Int)
 }
 
 public enum RequestRetryerError<HTTPResponseType: HttpResponseProtocol>: Error {
@@ -29,12 +29,12 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
     public typealias OutputType = HTTPResponseType
     
     private let retryConfiguration: HTTPClientRetryConfiguration
-    private let canRetryErrorFunction: (Swift.Error) -> Bool
+    private let errorStatusFunction: (Swift.Error) -> (isRetriable: Bool, code: Int)
     
     public init(retryConfiguration: HTTPClientRetryConfiguration,
-                canRetryErrorFunction: @escaping (Swift.Error) -> Bool) {
+                errorStatusFunction: @escaping (Swift.Error) -> (isRetriable: Bool, code: Int)) {
         self.retryConfiguration = retryConfiguration
-        self.canRetryErrorFunction = canRetryErrorFunction
+        self.errorStatusFunction = errorStatusFunction
     }
     
     public func handle<HandlerType>(input: HTTPRequestType, next: HandlerType) async throws
@@ -70,8 +70,16 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
             default:
                 return response
             }
-        } catch let error where self.canRetryErrorFunction(error) {
-            return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1, mostRecentResult: .error(error))
+        } catch {
+            let status = self.errorStatusFunction(error)
+            let result: RequestRetryerResult<HTTPResponseType> = .error(cause: error, code: status.code)
+            
+            if status.isRetriable {
+                return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1, mostRecentResult: result)
+            }
+            
+            // rethrow error
+            throw error
         }
     }
 }
