@@ -107,15 +107,18 @@ public class HttpRequestBuilder<HTTPRequestType: HttpRequestProtocol> {
         self.protocolType = value
         return self
     }
+    
+    public var endpoint: Endpoint {
+        return Endpoint(host: host,
+                        path: path,
+                        port: port,
+                        queryItems: queryItems,
+                        protocolType: protocolType)
+    }
 
     public func build() throws -> HTTPRequestType {
-        let endpoint = Endpoint(host: host,
-                                path: path,
-                                port: port,
-                                queryItems: queryItems,
-                                protocolType: protocolType)
         return try HTTPRequestType(
-            method: methodType, endpoint: endpoint,
+            method: methodType, endpoint: self.endpoint,
             headers: headers, body: body, additionalRequestProperties: additionalRequestProperties)
     }
 }
