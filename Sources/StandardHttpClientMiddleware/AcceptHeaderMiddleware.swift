@@ -15,7 +15,7 @@
 import HttpClientMiddleware
 
 public struct AcceptHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                        HTTPResponseType: HttpResponseProtocol>: ContentTypeMiddlewareProtocol {
+                                     HTTPResponseType: HttpResponseProtocol>: ContentTypeMiddlewareProtocol {
     public typealias InputType = HttpRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
