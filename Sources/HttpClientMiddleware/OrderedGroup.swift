@@ -30,9 +30,9 @@ struct RelativeOrder {
         }
         
         switch position {
-        case .last:
+        case .end:
             order.append(contentsOf: unDuplicatedList)
-        case .first:
+        case .start:
             order.insert(contentsOf: unDuplicatedList, at: 0)
         }
     }

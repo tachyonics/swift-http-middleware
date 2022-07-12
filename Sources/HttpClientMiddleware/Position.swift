@@ -16,8 +16,8 @@
 //
 
 public enum AbsolutePosition: Int {
-    case first = 0
-    case last = 1
+    case start = 0
+    case end = 1
 }
 
 public enum RelativePosition: Int {
