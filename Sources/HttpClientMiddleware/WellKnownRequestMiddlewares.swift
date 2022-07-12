@@ -100,6 +100,16 @@ public extension RequestURLProtocolTypeMiddlewareProtocol {
     }
 }
 
+public protocol RequestURLPortMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension RequestURLPortMiddlewareProtocol {
+    var id: String {
+        "URLPort"
+    }
+}
+
 
 public protocol RequestURLPathMiddlewareProtocol: MiddlewareProtocol {
     
