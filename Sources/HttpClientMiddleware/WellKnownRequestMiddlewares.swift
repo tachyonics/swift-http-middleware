@@ -90,6 +90,16 @@ public extension RequestURLHostMiddlewareProtocol {
     }
 }
 
+public protocol RequestURLProtocolTypeMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension RequestURLProtocolTypeMiddlewareProtocol {
+    var id: String {
+        "URLProtocolType"
+    }
+}
+
 
 public protocol RequestURLPathMiddlewareProtocol: MiddlewareProtocol {
     
