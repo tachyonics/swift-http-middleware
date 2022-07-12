@@ -55,6 +55,10 @@ public extension Endpoint {
             return ""
         }
         let queryString = queryItems.map { "\($0.name)=\($0.value ?? "")" }.joined(separator: "&")
-        return "?\(queryString)"
+        if queryString.count > 0 {
+            return "?\(queryString)"
+        } else {
+            return ""
+        }
     }
 }
