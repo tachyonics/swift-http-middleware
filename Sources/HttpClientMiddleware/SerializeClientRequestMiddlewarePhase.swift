@@ -12,23 +12,25 @@
 // permissions and limitations under the License.
 //
 //  SerializeInputMiddlewarePhase.swift
-//  swift-http-client-middleware
+//  HttpClientMiddleware
 //
 
-public let SerializeInputPhaseId = "SerializeInput"
+import HttpMiddleware
 
-public typealias SerializeInputMiddlewarePhase<InputType,
-                                               HTTPRequestType: HttpRequestProtocol,
-                                               HTTPResponseType: HttpResponseProtocol>
-    = MiddlewarePhase<SerializeInputMiddlewarePhaseInput<InputType, HTTPRequestType>, HTTPResponseType>
+public let SerializeClientRequestPhaseId = "SerializeClientRequest"
+
+public typealias SerializeClientRequestMiddlewarePhase<InputType,
+                                               HTTPRequestType: HttpClientRequestProtocol,
+                                               HTTPResponseType: HttpClientResponseProtocol>
+    = MiddlewarePhase<SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>, HTTPResponseType>
 
 public struct SerializeInputPhaseHandler<InputType,
-                                         HTTPRequestType: HttpRequestProtocol,
-                                         HTTPResponseType: HttpResponseProtocol,
+                                         HTTPRequestType: HttpClientRequestProtocol,
+                                         HTTPResponseType: HttpClientResponseProtocol,
                                          HandlerType: HandlerProtocol>: HandlerProtocol
-where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
+where HandlerType.InputType == HttpClientRequestBuilder<HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
     
-    public typealias InputType = SerializeInputMiddlewarePhaseInput<InputType, HTTPRequestType>
+    public typealias InputType = SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>
     
     public typealias OutputType = HTTPResponseType
     
@@ -38,7 +40,7 @@ where HandlerType.InputType == HttpRequestBuilder<HTTPRequestType>, HandlerType.
         self.handler = handler
     }
     
-    public func handle(input: SerializeInputMiddlewarePhaseInput<InputType, HTTPRequestType>) async throws -> OutputType {
+    public func handle(input: SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>) async throws -> OutputType {
         return try await handler.handle(input: input.builder)
     }
 }

@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public struct AcceptHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                     HTTPResponseType: HttpResponseProtocol>: AcceptHeaderMiddlewareProtocol {
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+public struct AcceptHeaderMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                     HTTPResponseType: HttpClientResponseProtocol>: AcceptHeaderMiddlewareProtocol {
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
     private let accept: String
@@ -25,9 +26,9 @@ public struct AcceptHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
         self.accept = accept
     }
     
-    public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
         input.withHeader(name: "Accept", value: self.accept)
         

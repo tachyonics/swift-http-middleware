@@ -12,21 +12,23 @@
 // permissions and limitations under the License.
 //
 //  BuildRequestMiddlewarePhase.swift
-//  swift-http-client-middleware
+//  HttpClientMiddleware
 //
 
-public let FinalizePhaseId = "Finalize"
+import HttpMiddleware
 
-public typealias FinalizeRequestMiddlewarePhase<HTTPRequestType: HttpRequestProtocol,
-                                                HTTPResponseType: HttpResponseProtocol>
+public let FinalizeClientRequestPhaseId = "FinalizeClientRequest"
+
+public typealias FinalizeClientRequestMiddlewarePhase<HTTPRequestType: HttpClientRequestProtocol,
+                                                      HTTPResponseType: HttpClientResponseProtocol>
     = MiddlewarePhase<HTTPRequestType, HTTPResponseType>
 
-public struct FinalizePhaseHandler<HTTPRequestType: HttpRequestProtocol,
-                                   HTTPResponseType: HttpResponseProtocol,
-                                   HandlerType: HandlerProtocol>: HandlerProtocol
+public struct FinalizeClientRequestPhaseHandler<HTTPRequestType: HttpClientRequestProtocol,
+                                                HTTPResponseType: HttpClientResponseProtocol,
+                                                HandlerType: HandlerProtocol>: HandlerProtocol
 where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
     
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     
     public typealias OutputType = HTTPResponseType
     

@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public struct RequestURLProtocolTypeMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                               HTTPResponseType: HttpResponseProtocol>: RequestURLProtocolTypeMiddlewareProtocol {
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+public struct RequestURLProtocolTypeMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                               HTTPResponseType: HttpClientResponseProtocol>: RequestURLProtocolTypeMiddlewareProtocol {
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
     private let urlProtocolType: ProtocolType
@@ -25,9 +26,9 @@ public struct RequestURLProtocolTypeMiddleware<HTTPRequestType: HttpRequestProto
         self.urlProtocolType = urlProtocolType
     }
     
-    public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
 
         input.withProtocol(self.urlProtocolType)

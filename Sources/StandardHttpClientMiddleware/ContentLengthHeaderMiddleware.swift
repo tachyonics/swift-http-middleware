@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                            HTTPResponseType: HttpResponseProtocol>: ContentLengthMiddlewareProtocol {
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                            HTTPResponseType: HttpClientResponseProtocol>: ContentLengthMiddlewareProtocol {
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
     private let omitHeaderForZeroLengthBody: Bool
@@ -25,9 +26,9 @@ public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpRequestProtocol
         self.omitHeaderForZeroLengthBody = omitHeaderForZeroLengthBody
     }
     
-    public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {        
         if let knownLength = input.body?.knownLength, knownLength != 0 || !self.omitHeaderForZeroLengthBody {
             input.withHeader(name: "Content-Length", value: "\(knownLength)")

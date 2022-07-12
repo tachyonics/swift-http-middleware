@@ -11,20 +11,10 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HttpRequestProtocol.swift
-//  swift-http-client-middleware
+//  HttpClientResponseProtocol.swift
+//  HttpClientMiddleware
 //
 
-public protocol HttpRequestProtocol {
-    associatedtype HeadersType: HttpHeadersProtocol
-    associatedtype BodyType: HTTPBodyProtocol
-    associatedtype AdditionalRequestPropertiesType
-    
-    init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?,
-         additionalRequestProperties: AdditionalRequestPropertiesType?) throws
-}
-
-public protocol HTTPBodyProtocol {
-    // can return nil if the body size cannot be computed
-    var knownLength: Int? { get }
+public protocol HttpClientResponseProtocol {
+    var statusCode: UInt { get }
 }

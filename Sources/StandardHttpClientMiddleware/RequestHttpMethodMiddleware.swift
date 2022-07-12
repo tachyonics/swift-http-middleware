@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public struct RequestHttpMethodMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                               HTTPResponseType: HttpResponseProtocol>: RequestMethodMiddlewareProtocol {
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+public struct RequestHttpMethodMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                               HTTPResponseType: HttpClientResponseProtocol>: RequestMethodMiddlewareProtocol {
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
     private let httpMethod: HttpMethod
@@ -25,9 +26,9 @@ public struct RequestHttpMethodMiddleware<HTTPRequestType: HttpRequestProtocol,
         self.httpMethod = httpMethod
     }
     
-    public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
 
         input.withMethod(self.httpMethod)

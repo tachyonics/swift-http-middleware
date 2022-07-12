@@ -43,7 +43,7 @@ public struct MiddlewarePhase<InputType, OutputType> {
     }
     
     /// Compose (wrap) the handler with the given middleware or essentially build out the linked list of middleware
-    internal func compose<HandlerType: HandlerProtocol>(
+    public func compose<HandlerType: HandlerProtocol>(
         next: HandlerType) -> AnyHandler<HandlerType.InputType, HandlerType.OutputType>
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
         var handler = next.eraseToAnyHandler()

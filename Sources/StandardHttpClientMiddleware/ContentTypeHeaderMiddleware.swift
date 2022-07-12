@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                          HTTPResponseType: HttpResponseProtocol>: ContentTypeMiddlewareProtocol {
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                          HTTPResponseType: HttpClientResponseProtocol>: ContentTypeMiddlewareProtocol {
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
     private let contentType: String
@@ -28,9 +29,9 @@ public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
         self.omitHeaderForZeroLengthBody = omitHeaderForZeroLengthBody
     }
     
-    public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
         if input.body?.knownLength != 0 || !self.omitHeaderForZeroLengthBody {
             input.withHeader(name: "Content-Type", value: self.contentType)

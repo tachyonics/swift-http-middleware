@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public struct UserAgentHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                        HTTPResponseType: HttpResponseProtocol>: UserAgentHeaderMiddlewareProtocol {
-    public typealias InputType = HttpRequestBuilder<HTTPRequestType>
+public struct UserAgentHeaderMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                        HTTPResponseType: HttpClientResponseProtocol>: UserAgentHeaderMiddlewareProtocol {
+    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     
     private let userAgent: String
@@ -25,9 +26,9 @@ public struct UserAgentHeaderMiddleware<HTTPRequestType: HttpRequestProtocol,
         self.userAgent = userAgent
     }
     
-    public func handle<HandlerType>(input: HttpRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
         input.withHeader(name: "User-Agent", value: self.userAgent)
         

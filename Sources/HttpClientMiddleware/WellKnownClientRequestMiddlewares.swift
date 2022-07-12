@@ -11,9 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  WellKnownRequestMiddlewares.swift
-//  swift-http-client-middleware
+//  WellKnownClientRequestMiddlewares.swift
+//  HttpClientMiddleware
 //
+
+import HttpMiddleware
 
 public protocol AcceptHeaderMiddlewareProtocol: MiddlewareProtocol {
     

@@ -11,12 +11,22 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  BuildRequestMiddlewarePhase.swift
-//  swift-http-client-middleware
+//  HttpClientRequestProtocol.swift
+//  HttpClientMiddleware
 //
 
-public let BuildPhaseId = "Build"
+import HttpMiddleware
 
-public typealias BuildRequestMiddlewarePhase<HTTPRequestType: HttpRequestProtocol,
-                                             HTTPResponseType: HttpResponseProtocol>
-    = MiddlewarePhase<HttpRequestBuilder<HTTPRequestType>, HTTPResponseType>
+public protocol HttpClientRequestProtocol {
+    associatedtype HeadersType: HttpHeadersProtocol
+    associatedtype BodyType: HTTPBodyProtocol
+    associatedtype AdditionalRequestPropertiesType
+    
+    init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?,
+         additionalRequestProperties: AdditionalRequestPropertiesType?) throws
+}
+
+public protocol HTTPBodyProtocol {
+    // can return nil if the body size cannot be computed
+    var knownLength: Int? { get }
+}

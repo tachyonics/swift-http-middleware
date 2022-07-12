@@ -12,19 +12,20 @@
 //
 //===----------------------------------------------------------------------===//
 
+import HttpMiddleware
 import HttpClientMiddleware
 
-public enum RequestRetryerResult<HTTPResponseType: HttpResponseProtocol> {
+public enum RequestRetryerResult<HTTPResponseType: HttpClientResponseProtocol> {
     case response(HTTPResponseType)
     case error(cause: Swift.Error, code: UInt)
 }
 
-public enum RequestRetryerError<HTTPResponseType: HttpResponseProtocol>: Error {
+public enum RequestRetryerError<HTTPResponseType: HttpClientResponseProtocol>: Error {
     case maximumRetryAttemptsExceeded(attemptCount: Int, mostRecentResult: RequestRetryerResult<HTTPResponseType>)
 }
 
-public struct RequestRetryerMiddleware<HTTPRequestType: HttpRequestProtocol,
-                                       HTTPResponseType: HttpResponseProtocol>: RequestRetryerMiddlewareProtocol {
+public struct RequestRetryerMiddleware<HTTPRequestType: HttpClientRequestProtocol,
+                                       HTTPResponseType: HttpClientResponseProtocol>: RequestRetryerMiddlewareProtocol {
     public typealias InputType = HTTPRequestType
     public typealias OutputType = HTTPResponseType
     

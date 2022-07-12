@@ -11,31 +11,33 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  OperationMiddlewareStack.swift
-//  swift-http-client-middleware
+//  ClientOperationMiddlewareStack.swift
+//  HttpClientMiddleware
 //
+
+import HttpMiddleware
 
 public let InitializePhaseId = "Initialize"
 
-public struct OperationMiddlewareStack<InputType, OutputType, HTTPRequestType: HttpRequestProtocol,
-                                       HTTPResponseType: HttpResponseProtocol> {
+public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestType: HttpClientRequestProtocol,
+                                             HTTPResponseType: HttpClientResponseProtocol> {
     public var _deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
     public var initializePhase: OperationMiddlewarePhase<InputType, OutputType>
-    public var serializeInputPhase: SerializeInputMiddlewarePhase<InputType, HTTPRequestType, HTTPResponseType>
-    public var buildPhase: BuildRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
-    public var finalizePhase: FinalizeRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var serializePhase: SerializeClientRequestMiddlewarePhase<InputType, HTTPRequestType, HTTPResponseType>
+    public var buildPhase: BuildClientRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
+    public var finalizePhase: FinalizeClientRequestMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
     public init<DeserializationTransformType: DeserializationTransformProtocol>(
         id: String, deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.HTTPResponseType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
         self.id = id
         self.initializePhase = OperationMiddlewarePhase(id: InitializePhaseId)
-        self.buildPhase = BuildRequestMiddlewarePhase(id: BuildPhaseId)
-        self.finalizePhase = FinalizeRequestMiddlewarePhase(id: FinalizePhaseId)
-        self.serializeInputPhase = SerializeInputMiddlewarePhase(id: SerializeInputPhaseId)
+        self.buildPhase = BuildClientRequestMiddlewarePhase(id: BuildClientRequestPhaseId)
+        self.finalizePhase = FinalizeClientRequestMiddlewarePhase(id: FinalizeClientRequestPhaseId)
+        self.serializePhase = SerializeClientRequestMiddlewarePhase(id: SerializeClientRequestPhaseId)
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
@@ -44,10 +46,10 @@ public struct OperationMiddlewareStack<InputType, OutputType, HTTPRequestType: H
                                                                next: HandlerType) async throws -> OutputType
     where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
         let finalize = finalizePhase.compose(next: next)
-        let build = buildPhase.compose(next: FinalizePhaseHandler(handler: finalize))
-        let serializeInput = serializeInputPhase.compose(next: SerializeInputPhaseHandler(handler: build))
-        let transform = SerializationTransformHandler(handler: serializeInput,
-                                                      deserializationTransform: self._deserializationTransform)
+        let build = buildPhase.compose(next: FinalizeClientRequestPhaseHandler(handler: finalize))
+        let serializeInput = serializePhase.compose(next: SerializeInputPhaseHandler(handler: build))
+        let transform = ClientSerializationTransformHandler(handler: serializeInput,
+                                                            deserializationTransform: self._deserializationTransform)
         let initialize = initializePhase.compose(next: transform)
               
         return try await initialize.handle(input: input)

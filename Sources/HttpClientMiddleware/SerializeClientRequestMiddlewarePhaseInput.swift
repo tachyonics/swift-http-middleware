@@ -11,13 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  SerializeInputMiddlewarePhaseInput.swift
-//  swift-http-client-middleware
+//  SerializeClientRequestMiddlewarePhaseInput.swift
+//  HttpClientMiddleware
 //
 
-import Foundation
-
-public struct SerializeInputMiddlewarePhaseInput<InputType, HTTPRequestType: HttpRequestProtocol> {
+public struct SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType: HttpClientRequestProtocol> {
     public let input: InputType
-    public let builder: HttpRequestBuilder<HTTPRequestType> = HttpRequestBuilder()
+    public let builder: HttpClientRequestBuilder<HTTPRequestType> = HttpClientRequestBuilder()
 }

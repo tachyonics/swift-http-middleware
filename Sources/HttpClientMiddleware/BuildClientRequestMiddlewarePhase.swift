@@ -11,10 +11,14 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HttpResponseProtocol.swift
-//  swift-http-client-middleware
+//  BuildClientRequestMiddlewarePhase.swift
+//  HttpClientMiddleware
 //
 
-public protocol HttpResponseProtocol {
-    var statusCode: UInt { get }
-}
+import HttpMiddleware
+
+public let BuildClientRequestPhaseId = "BuildClientRequest"
+
+public typealias BuildClientRequestMiddlewarePhase<HTTPRequestType: HttpClientRequestProtocol,
+                                                   HTTPResponseType: HttpClientResponseProtocol>
+    = MiddlewarePhase<HttpClientRequestBuilder<HTTPRequestType>, HTTPResponseType>

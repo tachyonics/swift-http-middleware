@@ -11,11 +11,13 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HttpRequestBuilder.swift
-//  swift-http-client-middleware
+//  HttpClientRequestBuilder.swift
+//  HttpClientMiddleware
 //
 
-public class HttpRequestBuilder<HTTPRequestType: HttpRequestProtocol> {
+import HttpMiddleware
+
+public class HttpClientRequestBuilder<HTTPRequestType: HttpClientRequestProtocol> {
     
     public typealias HeadersType = HTTPRequestType.HeadersType
     public typealias BodyType = HTTPRequestType.BodyType
