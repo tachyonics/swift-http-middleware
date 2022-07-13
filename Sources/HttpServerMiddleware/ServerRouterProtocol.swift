@@ -11,37 +11,37 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  ServerOperationRouterProtocol.swift
+//  ServerRouterProtocol.swift
 //  HttpServerMiddleware
 //
 
 import HttpMiddleware
 
 #if compiler(<5.7)
-public protocol ServerOperationRouterProtocol {
+public protocol ServerRouterProtocol {
     associatedtype HTTPRequestType: HttpServerRequestProtocol
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     
     func select(
-        httpRequestType: HTTPRequestType) async throws -> AnyServerOperationHandler<HTTPRequestType, HTTPResponseType>
+        httpRequestType: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
 }
 
-extension ServerOperationRouterProtocol {
-    public func eraseToAnyServerOperationRouter() -> AnyServerOperationRouter<HTTPRequestType, HTTPResponseType> {
-        return AnyServerOperationRouter(self)
+extension ServerRouterProtocol {
+    public func eraseToAnyServerRouter() -> AnyServerRouter<HTTPRequestType, HTTPResponseType> {
+        return AnyServerRouter(self)
     }
 }
 #else
-public protocol ServerOperationRouterProtocol {
+public protocol ServerRouterProtocol {
     associatedtype HTTPResponseType: HttpClientResponseProtocol
     associatedtype OutputType
     
     func select(
-        httpRequestType: HTTPRequestType) async throws -> AnyServerOperationHandler<HTTPRequestType, HTTPResponseType>
+        httpRequestType: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HTTPResponseType>
 }
 
-extension ServerOperationRouterProtocol {
-    public func eraseToAnyServerOperationRouter() -> any AnyServerOperationRouter<HTTPResponseType, OutputType> {
+extension ServerRouterProtocol {
+    public func eraseToAnyServerRouter() -> any AnyServerRouter<HTTPResponseType, OutputType> {
         return self
     }
 }

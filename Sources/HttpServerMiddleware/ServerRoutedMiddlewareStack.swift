@@ -11,33 +11,33 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  ServerRoutedRequestMiddlewareStack.swift
+//  ServerRoutedMiddlewareStack.swift
 //  HttpServerMiddleware
 //
 
 import HttpMiddleware
 
-public struct ServerRoutedRequestMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
-    public var router: AnyServerRequestRouter<HTTPRequestType, HTTPResponseType>
+public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
+    public var router: AnyServerRouter<HTTPRequestType, HTTPResponseType>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
     public var buildPhase: BuildServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     public var finalizePhase: FinalizeServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
-    public init<ServerRequestRouterType: ServerRequestRouterProtocol>(id: String,
+    public init<ServerRequestRouterType: ServerRouterProtocol>(id: String,
                 router: ServerRequestRouterType)
     where ServerRequestRouterType.HTTPRequestType == HTTPRequestType, ServerRequestRouterType.HTTPResponseType == HTTPResponseType {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
         self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
-        self.router = router.eraseToAnyServerRequestRouter()
+        self.router = router.eraseToAnyServerRouter()
     }
     
-    public mutating func replacingRouter<ServerRequestRouterType: ServerRequestRouterProtocol>(
+    public mutating func replacingRouter<ServerRequestRouterType: ServerRouterProtocol>(
         router: ServerRequestRouterType)
     where ServerRequestRouterType.HTTPRequestType == HTTPRequestType, ServerRequestRouterType.HTTPResponseType == HTTPResponseType {
-        self.router = router.eraseToAnyServerRequestRouter()
+        self.router = router.eraseToAnyServerRouter()
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain

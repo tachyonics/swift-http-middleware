@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  AnyServerRequestRouter.swift
+//  AnyServerRouter.swift
 //  HttpServerRequestRouter
 //
 
@@ -19,14 +19,14 @@ import HttpMiddleware
 
 #if compiler(<5.7)
 /// type erase the ServerRequestRouter protocol
-public struct AnyServerRequestRouter<HTTPRequestType: HttpServerRequestProtocol,
-                                     HTTPResponseType: HttpServerResponseProtocol>: ServerRequestRouterProtocol {
+public struct AnyServerRouter<HTTPRequestType: HttpServerRequestProtocol,
+                                     HTTPResponseType: HttpServerResponseProtocol>: ServerRouterProtocol {
     
     private let _select: (HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
 
-    public init<ServerRequestRouterType: ServerRequestRouterProtocol>(_ realServerRequestRouter: ServerRequestRouterType)
+    public init<ServerRequestRouterType: ServerRouterProtocol>(_ realServerRequestRouter: ServerRequestRouterType)
     where ServerRequestRouterType.HTTPRequestType == HTTPRequestType, ServerRequestRouterType.HTTPResponseType == HTTPResponseType {
-        if let alreadyErased = realServerRequestRouter as? AnyServerRequestRouter {
+        if let alreadyErased = realServerRequestRouter as? AnyServerRouter {
             self = alreadyErased
             return
         }
@@ -39,5 +39,5 @@ public struct AnyServerRequestRouter<HTTPRequestType: HttpServerRequestProtocol,
     }
 }
 #else
-public typealias AnyServerRequestRouter<MInput, MOutput> = any ServerTypedRequestRouterProtocol<MInput, MOutput>
+public typealias AnyServerRouter<MInput, MOutput> = any ServerRouterProtocol<MInput, MOutput>
 #endif
