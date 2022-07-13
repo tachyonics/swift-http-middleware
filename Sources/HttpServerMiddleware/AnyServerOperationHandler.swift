@@ -21,16 +21,15 @@ public struct AnyServerOperationHandler<HTTPRequestType: HttpServerRequestProtoc
     private let _handle: (HTTPRequestType) async throws -> HttpServerResponseBuilder<HTTPResponseType>
     
     public init<InputType, OutputType, HandlerType: HandlerProtocol>(next: HandlerType,
-                                                                     initializePhase: OperationMiddlewarePhase<InputType, OutputType>,
-                                                                     deserializationTransform: AnyDeserializationTransform<HTTPRequestType, InputType>,
-                                                                     serializePhase: SerializeServerResponseMiddlewarePhase<OutputType, HTTPRequestType, HTTPResponseType>)
+                                                                     middleware: SingleServerOperationMiddlewareStack<InputType, OutputType,
+                                                                                                                      HTTPRequestType, HTTPResponseType>)
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
         func handle(input: HTTPRequestType) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
-            let initialize = initializePhase.compose(next: next)
+            let initialize = middleware.initializePhase.compose(next: next)
             let transform = ServerSerializationTransformHandler<InputType, OutputType, HTTPRequestType, HTTPResponseType,
                                                                     AnyHandler<HandlerType.InputType, HandlerType.OutputType>>(
-                handler: initialize, deserializationTransform: deserializationTransform)
-            let serializeInput = serializePhase.compose(next: transform)
+                                                                        handler: initialize, deserializationTransform: middleware._deserializationTransform)
+            let serializeInput = middleware.serializePhase.compose(next: transform)
             let handlerOutput = SerializeServerResponsePhaseHandler(handler: serializeInput)
             
             return try await handlerOutput.handle(input: input)
