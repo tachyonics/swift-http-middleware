@@ -25,8 +25,3 @@ public protocol HttpClientRequestProtocol {
     init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?,
          additionalRequestProperties: AdditionalRequestPropertiesType?) throws
 }
-
-public protocol HTTPBodyProtocol {
-    // can return nil if the body size cannot be computed
-    var knownLength: Int? { get }
-}

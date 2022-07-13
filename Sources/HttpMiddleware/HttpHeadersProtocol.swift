@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  HttpHeadersProtocol.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 public protocol HttpHeadersProtocol: Equatable {

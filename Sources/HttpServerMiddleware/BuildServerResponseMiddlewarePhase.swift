@@ -11,9 +11,14 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  MiddlewareFunction.swift
-//  HttpMiddleware
+//  BuildServerResponseMiddlewarePhase.swift
+//  HttpServerMiddleware
 //
 
-public typealias MiddlewareFunction<InputType, OutputType> =
-    (InputType, AnyHandler<InputType, OutputType>) async throws -> OutputType
+import HttpMiddleware
+
+public let BuildServerResponsePhaseId = "BuildServerResponse"
+
+public typealias BuildServerResponseMiddlewarePhase<HTTPRequestType: HttpServerRequestProtocol,
+                                                    HTTPResponseType: HttpServerResponseProtocol>
+    = MiddlewarePhase<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>

@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  OrderedGroup.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 struct RelativeOrder {

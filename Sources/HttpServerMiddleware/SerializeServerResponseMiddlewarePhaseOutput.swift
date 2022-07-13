@@ -11,9 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  MiddlewareFunction.swift
-//  HttpMiddleware
+//  SerializeServerResponseMiddlewarePhaseOutput.swift
+//  HttpServerMiddleware
 //
 
-public typealias MiddlewareFunction<InputType, OutputType> =
-    (InputType, AnyHandler<InputType, OutputType>) async throws -> OutputType
+public struct SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType: HttpServerResponseProtocol> {
+    public let output: OutputType
+    public let builder: HttpServerResponseBuilder<HTTPResponseType> = HttpServerResponseBuilder()
+}

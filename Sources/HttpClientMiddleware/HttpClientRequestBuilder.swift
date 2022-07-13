@@ -120,7 +120,8 @@ public class HttpClientRequestBuilder<HTTPRequestType: HttpClientRequestProtocol
 
     public func build() throws -> HTTPRequestType {
         return try HTTPRequestType(
-            method: methodType, endpoint: self.endpoint,
-            headers: headers, body: body, additionalRequestProperties: additionalRequestProperties)
+            method: self.methodType, endpoint: self.endpoint,
+            headers: self.headers, body: self.body,
+            additionalRequestProperties: additionalRequestProperties)
     }
 }

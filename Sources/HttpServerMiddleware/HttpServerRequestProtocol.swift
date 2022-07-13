@@ -11,9 +11,10 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  MiddlewareFunction.swift
-//  HttpMiddleware
+//  HttpServerRequestProtocol.swift
+//  HttpServerMiddleware
 //
 
-public typealias MiddlewareFunction<InputType, OutputType> =
-    (InputType, AnyHandler<InputType, OutputType>) async throws -> OutputType
+public protocol HttpServerRequestProtocol {
+    // something will probably go here
+}

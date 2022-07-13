@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  MiddlewarePhase.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 public struct MiddlewarePhase<InputType, OutputType> {

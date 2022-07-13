@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  WrappedMiddleware.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 /// used to create middleware from a middleware function

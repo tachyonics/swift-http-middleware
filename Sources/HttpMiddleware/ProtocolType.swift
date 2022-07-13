@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  ProtocolType.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 public enum ProtocolType: String, CaseIterable {

@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  HandlerProtocol.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 #if compiler(<5.7)

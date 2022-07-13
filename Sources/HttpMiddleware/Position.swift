@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  Position.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 public enum AbsolutePosition: Int {

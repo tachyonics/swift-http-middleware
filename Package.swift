@@ -17,6 +17,9 @@ let package = Package(
             name: "HttpClientMiddleware",
             targets: ["HttpClientMiddleware"]),
         .library(
+            name: "HttpServerMiddleware",
+            targets: ["HttpServerMiddleware"]),
+        .library(
             name: "StandardHttpClientMiddleware",
             targets: ["StandardHttpClientMiddleware"]),
     ],
@@ -32,6 +35,10 @@ let package = Package(
             ]),
         .target(
             name: "HttpClientMiddleware", dependencies: [
+                .target(name: "HttpMiddleware")
+            ]),
+        .target(
+            name: "HttpServerMiddleware", dependencies: [
                 .target(name: "HttpMiddleware")
             ]),
         .target(

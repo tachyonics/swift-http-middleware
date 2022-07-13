@@ -12,7 +12,7 @@
 // permissions and limitations under the License.
 //
 //  OperationMiddlewarePhase.swift
-//  swift-http-client-middleware
+//  HttpMiddleware
 //
 
 public typealias OperationMiddlewarePhase<InputType, OutputType> = MiddlewarePhase<InputType, OutputType>

@@ -11,24 +11,24 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  FinalizeClientRequestMiddlewarePhase.swift
-//  HttpClientMiddleware
+//  FinalizeServerResponseMiddlewarePhase.swift
+//  HttpServerMiddleware
 //
 
 import HttpMiddleware
 
-public let FinalizeClientRequestPhaseId = "FinalizeClientRequest"
+public let FinalizeServerResponsePhaseId = "FinalizeServerResponse"
 
-public typealias FinalizeClientRequestMiddlewarePhase<HTTPRequestType: HttpClientRequestProtocol,
-                                                      HTTPResponseType: HttpClientResponseProtocol>
+public typealias FinalizeServerResponseMiddlewarePhase<HTTPRequestType: HttpServerRequestProtocol,
+                                                       HTTPResponseType: HttpServerResponseProtocol>
     = MiddlewarePhase<HTTPRequestType, HTTPResponseType>
 
-public struct FinalizeClientRequestPhaseHandler<HTTPRequestType: HttpClientRequestProtocol,
-                                                HTTPResponseType: HttpClientResponseProtocol,
-                                                HandlerType: HandlerProtocol>: HandlerProtocol
-where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
+public struct FinalizeServerResponsePhaseHandler<HTTPRequestType: HttpServerRequestProtocol,
+                                                 HTTPResponseType: HttpServerResponseProtocol,
+                                                 HandlerType: HandlerProtocol>: HandlerProtocol
+where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HttpServerResponseBuilder<HTTPResponseType> {
     
-    public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
+    public typealias InputType = HTTPRequestType
     
     public typealias OutputType = HTTPResponseType
     
@@ -39,6 +39,8 @@ where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPRe
     }
     
     public func handle(input: InputType) async throws -> OutputType {
-        return try await handler.handle(input: input.build())
+        let builder = try await handler.handle(input: input)
+        
+        return try builder.build()
     }
 }

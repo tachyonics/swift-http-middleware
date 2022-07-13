@@ -11,9 +11,11 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  MiddlewareFunction.swift
+//  HTTPBodyProtocol.swift
 //  HttpMiddleware
 //
 
-public typealias MiddlewareFunction<InputType, OutputType> =
-    (InputType, AnyHandler<InputType, OutputType>) async throws -> OutputType
+public protocol HTTPBodyProtocol {
+    // can return nil if the body size cannot be computed
+    var knownLength: Int? { get }
+}
