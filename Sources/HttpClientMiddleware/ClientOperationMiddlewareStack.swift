@@ -41,6 +41,12 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
+    public mutating func replacingDeserializationTransform<DeserializationTransformType: DeserializationTransformProtocol>(
+        deserializationTransform: DeserializationTransformType)
+    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+        self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
+    }
+    
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware<HandlerType: HandlerProtocol>(input: InputType,
                                                                next: HandlerType) async throws -> OutputType
