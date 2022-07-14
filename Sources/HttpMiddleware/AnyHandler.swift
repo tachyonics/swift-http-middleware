@@ -17,22 +17,28 @@
 
 #if compiler(<5.7)
 /// Type erased Handler
-public struct AnyHandler<InputType, OutputType>: HandlerProtocol {
-    private let _handle: (InputType) async throws -> OutputType
+public struct AnyHandler<InputType, OutputType, ContextType>: HandlerProtocol {
+    private let _handle: (InputType, ContextType) async throws -> OutputType
     
     public init<HandlerType: HandlerProtocol> (_ realHandler: HandlerType)
-    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
-        if let alreadyErased = realHandler as? AnyHandler<InputType, OutputType> {
+    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType, HandlerType.ContextType == ContextType {
+        if let alreadyErased = realHandler as? AnyHandler<InputType, OutputType, ContextType> {
             self = alreadyErased
             return
         }
         self._handle = realHandler.handle
     }
     
-    public func handle(input: InputType) async throws -> OutputType {
-        return try await _handle(input)
+    public func handle(input: InputType, context: ContextType) async throws -> OutputType {
+        return try await _handle(input, context)
     }
 }
 #else
-public typealias AnyHandler<MInput, MOutput> = any HandlerProtocol<MInput, MOutput>
+public typealias AnyHandler<InputType, OutputType, ContextType> = any HandlerProtocol<InputType, OutputType, ContextType>
 #endif
+
+public typealias AnyMiddlewareHandler<InputType, OutputType> = AnyHandler<InputType, OutputType, MiddlewareContext>
+
+extension AnyHandler: MiddlewareHandlerProtocol where ContextType == MiddlewareContext {
+    
+}

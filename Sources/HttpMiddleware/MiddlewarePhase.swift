@@ -43,8 +43,8 @@ public struct MiddlewarePhase<InputType, OutputType> {
     }
     
     /// Compose (wrap) the handler with the given middleware or essentially build out the linked list of middleware
-    public func compose<HandlerType: HandlerProtocol>(
-        next: HandlerType) -> AnyHandler<HandlerType.InputType, HandlerType.OutputType>
+    public func compose<HandlerType: MiddlewareHandlerProtocol>(
+        next: HandlerType) -> AnyMiddlewareHandler<HandlerType.InputType, HandlerType.OutputType>
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
         var handler = next.eraseToAnyHandler()
         let order = orderedMiddleware.orderedItems
@@ -66,12 +66,12 @@ public struct MiddlewarePhase<InputType, OutputType> {
 // handler chain, used to decorate a handler with middleware
 struct ComposedMiddlewarePhaseHandler<InputType, OutputType> {
     // the next handler to call
-    let next: AnyHandler<InputType, OutputType>
+    let next: AnyHandler<InputType, OutputType, MiddlewareContext>
     
     // the middleware decorating 'next'
     let with: AnyMiddleware<InputType, OutputType>
     
-    public init<HandlerType: HandlerProtocol, MiddlewareType: MiddlewareProtocol>(
+    public init<HandlerType: MiddlewareHandlerProtocol, MiddlewareType: MiddlewareProtocol>(
         _ realNext: HandlerType, _ realWith: MiddlewareType)
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType,
           MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType
@@ -83,7 +83,7 @@ struct ComposedMiddlewarePhaseHandler<InputType, OutputType> {
 }
 
 extension ComposedMiddlewarePhaseHandler: HandlerProtocol {
-    public func handle(input: InputType) async throws -> OutputType {
-        return try await with.handle(input: input, next: next)
+    public func handle(input: InputType, context: MiddlewareContext) async throws -> OutputType {
+        return try await with.handle(input: input, context: context, next: next)
     }
 }

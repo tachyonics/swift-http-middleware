@@ -38,20 +38,21 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpClientRequestProtoco
         self.errorStatusFunction = errorStatusFunction
     }
     
-    public func handle<HandlerType>(input: HTTPRequestType, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HTTPRequestType,
+                                    context: MiddlewareContext, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HTTPRequestType == HandlerType.InputType,
+    where HandlerType : MiddlewareHandlerProtocol, HTTPRequestType == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
-        return try await handle(input: input, next: next,
+        return try await handle(input: input, context: context, next: next,
                                 retriesRemaining: self.retryConfiguration.numRetries,
                                 mostRecentResult: nil)
     }
     
-    private func handle<HandlerType>(input: HTTPRequestType, next: HandlerType,
+    private func handle<HandlerType>(input: HTTPRequestType, context: MiddlewareContext, next: HandlerType,
                                      retriesRemaining: Int,
                                      mostRecentResult: RequestRetryerResult<HTTPResponseType>?) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HTTPRequestType == HandlerType.InputType,
+    where HandlerType : MiddlewareHandlerProtocol, HTTPRequestType == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
         if let mostRecentResult = mostRecentResult {
             guard retriesRemaining > 0 else {
@@ -61,14 +62,14 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpClientRequestProtoco
         }
         
         do {
-            let response = try await next.handle(input: input)
+            let response = try await next.handle(input: input, context: context)
             
             switch response.statusCode {
             case 500...599:
                 try await self.retryConfiguration.waitForNextRetry(retriesRemaining: retriesRemaining)
                 
                 // server error, retry
-                return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1,
+                return try await handle(input: input, context: context, next: next, retriesRemaining: retriesRemaining - 1,
                                         mostRecentResult: .response(response))
             default:
                 return response
@@ -80,7 +81,7 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpClientRequestProtoco
             if status.isRetriable {
                 try await self.retryConfiguration.waitForNextRetry(retriesRemaining: retriesRemaining)
                 
-                return try await handle(input: input, next: next, retriesRemaining: retriesRemaining - 1, mostRecentResult: result)
+                return try await handle(input: input, context: context, next: next, retriesRemaining: retriesRemaining - 1, mostRecentResult: result)
             }
             
             // rethrow error

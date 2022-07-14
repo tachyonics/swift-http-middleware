@@ -26,13 +26,14 @@ public struct RequestURLPortMiddleware<HTTPRequestType: HttpClientRequestProtoco
         self.urlPort = urlPort
     }
     
-    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>,
+                                    context: MiddlewareContext, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : MiddlewareHandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
 
         input.withPort(self.urlPort)
         
-        return try await next.handle(input: input)
+        return try await next.handle(input: input, context: context)
     }
 }

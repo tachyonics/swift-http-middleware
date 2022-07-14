@@ -20,10 +20,10 @@ import HttpMiddleware
 public struct ServerRouterOutput<HTTPRequestType: HttpServerRequestProtocol,
                                  HTTPResponseType: HttpServerResponseProtocol> {
     public let httpRequest: HTTPRequestType
-    public let handler: AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
+    public let handler: AnyMiddlewareHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
     
     public init(httpRequest: HTTPRequestType,
-                handler: AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>) {
+                handler: AnyMiddlewareHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>) {
         self.httpRequest = httpRequest
         self.handler = handler
     }

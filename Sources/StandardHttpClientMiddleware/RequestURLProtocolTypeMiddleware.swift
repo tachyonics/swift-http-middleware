@@ -26,13 +26,14 @@ public struct RequestURLProtocolTypeMiddleware<HTTPRequestType: HttpClientReques
         self.urlProtocolType = urlProtocolType
     }
     
-    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>,
+                                    context: MiddlewareContext, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : MiddlewareHandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
 
         input.withProtocol(self.urlProtocolType)
         
-        return try await next.handle(input: input)
+        return try await next.handle(input: input, context: context)
     }
 }

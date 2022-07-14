@@ -27,7 +27,7 @@ public typealias SerializeServerResponseMiddlewarePhase<OutputType,
 public struct SerializeServerResponsePhaseHandler<OutputType,
                                                   HTTPRequestType: HttpServerRequestProtocol,
                                                   HTTPResponseType: HttpServerResponseProtocol,
-                                                  HandlerType: HandlerProtocol>: HandlerProtocol
+                                                  HandlerType: MiddlewareHandlerProtocol>: MiddlewareHandlerProtocol
 where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType> {
     
     public typealias InputType = HTTPRequestType
@@ -40,8 +40,8 @@ where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == Serial
         self.handler = handler
     }
     
-    public func handle(input: HTTPRequestType) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
-        let phaseOutput = try await handler.handle(input: input)
+    public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
+        let phaseOutput = try await handler.handle(input: input, context: context)
         
         return phaseOutput.builder
     }

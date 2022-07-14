@@ -31,22 +31,24 @@ public struct ClientRequestMiddlewareStack<HTTPRequestType: HttpClientRequestPro
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
-    public func handleMiddleware<HandlerType: HandlerProtocol>(
+    public func handleMiddleware<HandlerType: MiddlewareHandlerProtocol>(
                                              input: HttpClientRequestBuilder<HTTPRequestType>,
+                                             context: MiddlewareContext,
                                              next: HandlerType) async throws -> HTTPResponseType
     where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
         let finalize = finalizePhase.compose(next: next)
         let build = buildPhase.compose(next: FinalizeClientRequestPhaseHandler(handler: finalize))
               
-        return try await build.handle(input: input)
+        return try await build.handle(input: input, context: context)
     }
     
-    mutating public func presignedRequest<HandlerType: HandlerProtocol>(
+    mutating public func presignedRequest<HandlerType: MiddlewareHandlerProtocol>(
                                                       input: HttpClientRequestBuilder<HTTPRequestType>,
+                                                      context: MiddlewareContext,
                                                       next: HandlerType) async throws -> HttpClientRequestBuilder<HTTPRequestType>
     where HandlerType.InputType == HTTPRequestType,
           HandlerType.OutputType == HTTPResponseType {
-        _ = try await handleMiddleware(input: input, next: next)
+        _ = try await handleMiddleware(input: input, context: context, next: next)
         return input
     }
 }

@@ -16,4 +16,4 @@
 //
 
 public typealias MiddlewareFunction<InputType, OutputType> =
-    (InputType, AnyHandler<InputType, OutputType>) async throws -> OutputType
+    (InputType, MiddlewareContext, AnyMiddlewareHandler<InputType, OutputType>) async throws -> OutputType

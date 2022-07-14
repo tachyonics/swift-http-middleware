@@ -19,26 +19,32 @@
 public protocol HandlerProtocol {
     associatedtype InputType
     associatedtype OutputType
+    associatedtype ContextType
        
-    func handle(input: InputType) async throws -> OutputType
+    func handle(input: InputType, context: ContextType) async throws -> OutputType
 }
 
 extension HandlerProtocol {
-    public func eraseToAnyHandler() -> AnyHandler<InputType, OutputType> {
+    public func eraseToAnyHandler() -> AnyHandler<InputType, OutputType, ContextType> {
         return AnyHandler(self)
     }
 }
 #else
-public protocol HandlerProtocol<Input, Output> {
+public protocol HandlerProtocol<InputType, OutputType, ContextType>> {
     associatedtype InputType
     associatedtype OutputType
+    associatedtype ContextType
        
-    func handle(input: Input) async throws -> Output
+    func handle(input: InputType, context: ContextType) async throws -> OutputType
 }
 
 extension HandlerProtocol {
-    public func eraseToAnyHandler() -> any HandlerProtocol<Input, Output> {
+    public func eraseToAnyHandler() -> any HandlerProtocol<InputType, OutputType, ContextType>> {
         return self
     }
 }
 #endif
+
+public protocol MiddlewareHandlerProtocol: HandlerProtocol where ContextType == MiddlewareContext {
+    
+}

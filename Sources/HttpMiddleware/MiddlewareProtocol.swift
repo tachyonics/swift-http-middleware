@@ -15,6 +15,12 @@
 //  HttpMiddleware
 //
 
+import Logging
+
+public struct MiddlewareContext {
+    let logger: Logger
+}
+
 #if compiler(<5.7)
 public protocol MiddlewareProtocol {
     associatedtype InputType
@@ -23,8 +29,9 @@ public protocol MiddlewareProtocol {
     /// The middleware ID
     var id: String { get }
     
-    func handle<HandlerType: HandlerProtocol>(
+    func handle<HandlerType: MiddlewareHandlerProtocol>(
         input: InputType,
+        context: MiddlewareContext,
         next: HandlerType) async throws -> OutputType
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType
 }

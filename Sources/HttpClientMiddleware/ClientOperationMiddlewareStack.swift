@@ -48,8 +48,9 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
-    public func handleMiddleware<HandlerType: HandlerProtocol>(input: InputType,
-                                                               next: HandlerType) async throws -> OutputType
+    public func handleMiddleware<HandlerType: MiddlewareHandlerProtocol>(input: InputType,
+                                                                         context: MiddlewareContext,
+                                                                         next: HandlerType) async throws -> OutputType
     where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
         let finalize = finalizePhase.compose(next: next)
         let build = buildPhase.compose(next: FinalizeClientRequestPhaseHandler(handler: finalize))
@@ -58,13 +59,14 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
                                                             deserializationTransform: self._deserializationTransform)
         let initialize = initializePhase.compose(next: transform)
               
-        return try await initialize.handle(input: input)
+        return try await initialize.handle(input: input, context: context)
     }
     
-    mutating public func presignedRequest<HandlerType: HandlerProtocol>(input: InputType,
-                                                                        next: HandlerType) async throws -> InputType
+    mutating public func presignedRequest<HandlerType: MiddlewareHandlerProtocol>(input: InputType,
+                                                                                  context: MiddlewareContext,
+                                                                                  next: HandlerType) async throws -> InputType
     where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
-        _ = try await handleMiddleware(input: input, next: next)
+        _ = try await handleMiddleware(input: input, context: context, next: next)
         return input
     }
 }

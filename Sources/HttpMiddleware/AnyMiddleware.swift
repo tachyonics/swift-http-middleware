@@ -19,8 +19,8 @@
 /// type erase the Middleware protocol
 public struct AnyMiddleware<InputType, OutputType>: MiddlewareProtocol {
     
-    private let _handle: (InputType,
-                          AnyHandler<InputType, OutputType>) async throws -> OutputType
+    private let _handle: (InputType, MiddlewareContext,
+                          AnyMiddlewareHandler<InputType, OutputType>) async throws -> OutputType
 
     public var id: String
 
@@ -38,17 +38,17 @@ public struct AnyMiddleware<InputType, OutputType>: MiddlewareProtocol {
     public init<HandlerType: HandlerProtocol>(handler: HandlerType, id: String)
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
         
-        self._handle = { input, handler in
-            try await handler.handle(input: input)
+        self._handle = { input, context, handler in
+            try await handler.handle(input: input, context: context)
         }
         self.id = id
     }
 
-    public func handle<HandlerType: HandlerProtocol>(input: InputType, next: HandlerType) async throws
+    public func handle<HandlerType: MiddlewareHandlerProtocol>(input: InputType, context: MiddlewareContext, next: HandlerType) async throws
     -> OutputType
     where HandlerType.InputType == InputType,
           HandlerType.OutputType == OutputType {
-        return try await _handle(input, next.eraseToAnyHandler())
+        return try await _handle(input, context, next.eraseToAnyHandler())
     }
 }
 #else

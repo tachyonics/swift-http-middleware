@@ -25,7 +25,7 @@ public typealias FinalizeClientRequestMiddlewarePhase<HTTPRequestType: HttpClien
 
 public struct FinalizeClientRequestPhaseHandler<HTTPRequestType: HttpClientRequestProtocol,
                                                 HTTPResponseType: HttpClientResponseProtocol,
-                                                HandlerType: HandlerProtocol>: HandlerProtocol
+                                                HandlerType: MiddlewareHandlerProtocol>: MiddlewareHandlerProtocol
 where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPResponseType {
     
     public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
@@ -38,7 +38,7 @@ where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPRe
         self.handler = handler
     }
     
-    public func handle(input: InputType) async throws -> OutputType {
-        return try await handler.handle(input: input.build())
+    public func handle(input: InputType, context: MiddlewareContext) async throws -> OutputType {
+        return try await handler.handle(input: input.build(), context: context)
     }
 }

@@ -26,12 +26,13 @@ public struct AcceptHeaderMiddleware<HTTPRequestType: HttpClientRequestProtocol,
         self.accept = accept
     }
     
-    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HttpClientRequestBuilder<HTTPRequestType>,
+                                    context: MiddlewareContext, next: HandlerType) async throws
     -> HTTPResponseType
-    where HandlerType : HandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
+    where HandlerType : MiddlewareHandlerProtocol, HttpClientRequestBuilder<HTTPRequestType> == HandlerType.InputType,
     HTTPResponseType == HandlerType.OutputType {
         input.withHeader(name: "Accept", value: self.accept)
         
-        return try await next.handle(input: input)
+        return try await next.handle(input: input, context: context)
     }
 }

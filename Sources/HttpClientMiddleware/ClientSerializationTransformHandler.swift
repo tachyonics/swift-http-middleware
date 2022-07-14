@@ -18,7 +18,7 @@
 import HttpMiddleware
 
 public struct ClientSerializationTransformHandler<InputType, OutputType, HTTPRequestType: HttpClientRequestProtocol,
-                                                  HTTPResponseType: HttpClientResponseProtocol, HandlerType: HandlerProtocol>: HandlerProtocol
+                                                  HTTPResponseType: HttpClientResponseProtocol, HandlerType: MiddlewareHandlerProtocol>: MiddlewareHandlerProtocol
 where HandlerType.InputType == SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>, HandlerType.OutputType == HTTPResponseType {
 
     public typealias Input = InputType
@@ -36,10 +36,10 @@ where HandlerType.InputType == SerializeClientRequestMiddlewarePhaseInput<InputT
         self.deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
-    public func handle(input: InputType) async throws -> Output {
+    public func handle(input: InputType, context: MiddlewareContext) async throws -> Output {
         let serializationInput = SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>(input: input)
         
-        let httpResponse = try await handler.handle(input: serializationInput)
+        let httpResponse = try await handler.handle(input: serializationInput, context: context)
         return try await self.deserializationTransform.transform(input: httpResponse)
     }
 }

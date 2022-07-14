@@ -25,10 +25,11 @@ struct WrappedMiddleware<InputType, OutputType>: MiddlewareProtocol {
         self.id = id
     }
     
-    func handle<HandlerType: HandlerProtocol>(
+    func handle<HandlerType: MiddlewareHandlerProtocol>(
         input: InputType,
+        context: MiddlewareContext,
         next: HandlerType) async throws -> OutputType
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
-        return try await _middleware(input, next.eraseToAnyHandler())
+        return try await _middleware(input, context, next.eraseToAnyHandler())
     }
 }

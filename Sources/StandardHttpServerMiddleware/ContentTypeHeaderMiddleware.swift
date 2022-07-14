@@ -29,11 +29,12 @@ public struct ContentTypeHeaderMiddleware<HTTPRequestType: HttpServerRequestProt
         self.omitHeaderForZeroLengthBody = omitHeaderForZeroLengthBody
     }
     
-    public func handle<HandlerType>(input: HTTPRequestType, next: HandlerType) async throws
+    public func handle<HandlerType>(input: HTTPRequestType,
+                                    context: MiddlewareContext, next: HandlerType) async throws
     -> HttpServerResponseBuilder<HTTPResponseType>
-    where HandlerType : HandlerProtocol, HTTPRequestType == HandlerType.InputType,
+    where HandlerType : MiddlewareHandlerProtocol, HTTPRequestType == HandlerType.InputType,
     HttpServerResponseBuilder<HTTPResponseType> == HandlerType.OutputType {
-        let builder = try await next.handle(input: input)
+        let builder = try await next.handle(input: input, context: context)
         
         if builder.body?.knownLength != 0 || !self.omitHeaderForZeroLengthBody {
             builder.withHeader(name: "Content-Type", value: self.contentType)

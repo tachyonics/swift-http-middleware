@@ -16,8 +16,8 @@
 
 import HttpMiddleware
 
-public struct ServerOperationHandler<HandlerType: HandlerProtocol, HTTPRequestType: HttpServerRequestProtocol,
-                                     HTTPResponseType: HttpServerResponseProtocol>: HandlerProtocol {
+public struct ServerOperationHandler<HandlerType: MiddlewareHandlerProtocol, HTTPRequestType: HttpServerRequestProtocol,
+                                     HTTPResponseType: HttpServerResponseProtocol>: MiddlewareHandlerProtocol {
     private let next: HandlerType
     private let middleware: SingleServerOperationMiddlewareStack<HandlerType.InputType, HandlerType.OutputType,
                                                                  HTTPRequestType, HTTPResponseType>
@@ -29,14 +29,14 @@ public struct ServerOperationHandler<HandlerType: HandlerProtocol, HTTPRequestTy
         self.middleware = middleware
     }
     
-    public func handle(input: HTTPRequestType) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
+    public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
         let initialize = middleware.initializePhase.compose(next: next)
         let transform = ServerSerializationTransformHandler<HandlerType.InputType, HandlerType.OutputType, HTTPRequestType, HTTPResponseType,
-                                                                AnyHandler<HandlerType.InputType, HandlerType.OutputType>>(
+                                                                AnyMiddlewareHandler<HandlerType.InputType, HandlerType.OutputType>>(
                                                                     handler: initialize, deserializationTransform: middleware._deserializationTransform)
         let serializeInput = middleware.serializePhase.compose(next: transform)
         let handlerOutput = SerializeServerResponsePhaseHandler(handler: serializeInput)
         
-        return try await handlerOutput.handle(input: input)
+        return try await handlerOutput.handle(input: input, context: context)
     }
 }
