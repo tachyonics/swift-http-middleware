@@ -15,6 +15,16 @@
 //  HttpClientMiddleware
 //
 
+public protocol LoggerMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension LoggerMiddlewareProtocol {
+    var id: String {
+        "Logger"
+    }
+}
+
 public protocol ContentLengthMiddlewareProtocol: MiddlewareProtocol {
     
 }
