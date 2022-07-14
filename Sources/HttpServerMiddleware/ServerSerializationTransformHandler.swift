@@ -37,10 +37,10 @@ where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
     }
     
     public func handle(input: HTTPRequestType) async throws -> Output {
-        let serializationOutput = try await self.deserializationTransform.transform(input: input)
+        let deserializationOutput = try await self.deserializationTransform.transform(input: input)
         
-        let output = try await handler.handle(input: serializationOutput)
+        let serializationPhaseInput = try await handler.handle(input: deserializationOutput)
         
-        return SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType>(output: output)
+        return SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType>(operationResponse: serializationPhaseInput)
     }
 }
