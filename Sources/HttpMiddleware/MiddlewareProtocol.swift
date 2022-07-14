@@ -18,7 +18,7 @@
 import Logging
 
 public struct MiddlewareContext {
-    let logger: Logger
+    public let logger: Logger
     
     public init(logger: Logger) {
         self.logger = logger
