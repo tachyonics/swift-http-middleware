@@ -35,6 +35,12 @@ public struct SingleServerOperationMiddlewareStack<InputType, OutputType,
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
+    public init(
+        id: String)
+    where InputType == Void {
+        self.init(id: id, deserializationTransform: VoidOutputDeserializationTransform())
+    }
+    
     public mutating func replacingDeserializationTransform<DeserializationTransformType: DeserializationTransformProtocol>(
         deserializationTransform: DeserializationTransformType)
     where DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType,

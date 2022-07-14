@@ -42,6 +42,12 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     
+    public init(
+        id: String)
+    where OutputType == Void {
+        self.init(id: id, deserializationTransform: VoidOutputDeserializationTransform())
+    }
+    
     public mutating func replacingDeserializationTransform<DeserializationTransformType: DeserializationTransformProtocol>(
         deserializationTransform: DeserializationTransformType)
     where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType,
