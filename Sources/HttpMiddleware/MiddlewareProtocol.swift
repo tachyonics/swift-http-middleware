@@ -20,7 +20,7 @@ import Logging
 public struct MiddlewareContext {
     public let logger: Logger
     
-    public init(logger: Logger) {
+    public init(logger: Logger = Logger(label: "MiddlewareContext")) {
         self.logger = logger
     }
 }
