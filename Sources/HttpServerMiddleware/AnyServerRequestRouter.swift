@@ -19,13 +19,15 @@ import HttpMiddleware
 
 #if compiler(<5.7)
 /// type erase the ServerRequestRouter protocol
-public struct AnyServerRouter<HTTPRequestType: HttpServerRequestProtocol,
-                                     HTTPResponseType: HttpServerResponseProtocol>: ServerRouterProtocol {
+public struct AnyServerRouter<InputHTTPRequestType: HttpServerRequestProtocol,
+                              OutputHTTPRequestType: HttpServerRequestProtocol,
+                              HTTPResponseType: HttpServerResponseProtocol>: ServerRouterProtocol {
     
-    private let _select: (HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
+    private let _select: (InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
 
     public init<ServerRequestRouterType: ServerRouterProtocol>(_ realServerRequestRouter: ServerRequestRouterType)
-    where ServerRequestRouterType.HTTPRequestType == HTTPRequestType, ServerRequestRouterType.HTTPResponseType == HTTPResponseType {
+    where ServerRequestRouterType.InputHTTPRequestType == InputHTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == OutputHTTPRequestType,
+    ServerRequestRouterType.HTTPResponseType == HTTPResponseType {
         if let alreadyErased = realServerRequestRouter as? AnyServerRouter {
             self = alreadyErased
             return
@@ -34,10 +36,11 @@ public struct AnyServerRouter<HTTPRequestType: HttpServerRequestProtocol,
         self._select = realServerRequestRouter.select
     }
 
-    public func select(httpRequestType: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>> {
+    public func select(httpRequestType: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType> {
         return try await self._select(httpRequestType)
     }
 }
 #else
-public typealias AnyServerRouter<MInput, MOutput> = any ServerRouterProtocol<MInput, MOutput>
+public typealias AnyServerRouter<InputHTTPRequestType, OutputHTTPRequestType, HTTPResponseType>
+    = any ServerRouterProtocol<InputHTTPRequestType, OutputHTTPRequestType, HTTPResponseType>
 #endif

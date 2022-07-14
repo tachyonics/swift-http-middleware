@@ -17,17 +17,30 @@
 
 import HttpMiddleware
 
+public struct ServerRouterOutput<HTTPRequestType: HttpServerRequestProtocol,
+                                 HTTPResponseType: HttpServerResponseProtocol> {
+    public let httpRequest: HTTPRequestType
+    public let handler: AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
+    
+    public init(httpRequest: HTTPRequestType,
+                handler: AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>) {
+        self.httpRequest = httpRequest
+        self.handler = handler
+    }
+}
+
 #if compiler(<5.7)
 public protocol ServerRouterProtocol {
-    associatedtype HTTPRequestType: HttpServerRequestProtocol
+    associatedtype InputHTTPRequestType: HttpServerRequestProtocol
+    associatedtype OutputHTTPRequestType: HttpServerRequestProtocol
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     
     func select(
-        httpRequestType: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
+        httpRequestType: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
 }
 
 extension ServerRouterProtocol {
-    public func eraseToAnyServerRouter() -> AnyServerRouter<HTTPRequestType, HTTPResponseType> {
+    public func eraseToAnyServerRouter() -> AnyServerRouter<InputHTTPRequestType, OutputHTTPRequestType, HTTPResponseType> {
         return AnyServerRouter(self)
     }
 }
