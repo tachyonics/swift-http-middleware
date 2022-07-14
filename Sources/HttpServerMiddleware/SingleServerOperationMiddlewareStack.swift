@@ -21,14 +21,15 @@ public let InitializePhaseId = "Initialize"
 
 public struct SingleServerOperationMiddlewareStack<InputType, OutputType,
                                                    HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
-    public var _deserializationTransform: AnyDeserializationTransform<HTTPRequestType, InputType>
+    public var _deserializationTransform: AnyDeserializationTransform<HTTPRequestType, InputType, MiddlewareContext>
 
     public var initializePhase: OperationMiddlewarePhase<InputType, OutputType>
     public var serializePhase: SerializeServerResponseMiddlewarePhase<OutputType, HTTPRequestType, HTTPResponseType>
     
     public init<DeserializationTransformType: DeserializationTransformProtocol>(
         id: String, deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType {
+    where DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType,
+    DeserializationTransformType.ContextType == MiddlewareContext {
         self.initializePhase = OperationMiddlewarePhase(id: InitializePhaseId)
         self.serializePhase = SerializeServerResponseMiddlewarePhase(id: SerializeServerResponsePhaseId)
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
@@ -36,7 +37,8 @@ public struct SingleServerOperationMiddlewareStack<InputType, OutputType,
     
     public mutating func replacingDeserializationTransform<DeserializationTransformType: DeserializationTransformProtocol>(
         deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType {
+    where DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType,
+    DeserializationTransformType.ContextType == MiddlewareContext {
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
 }

@@ -21,7 +21,7 @@ public let InitializePhaseId = "Initialize"
 
 public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestType: HttpClientRequestProtocol,
                                              HTTPResponseType: HttpClientResponseProtocol> {
-    public var _deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType>
+    public var _deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType, MiddlewareContext>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
@@ -32,7 +32,8 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
     
     public init<DeserializationTransformType: DeserializationTransformProtocol>(
         id: String, deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType,
+    DeserializationTransformType.ContextType == MiddlewareContext {
         self.id = id
         self.initializePhase = OperationMiddlewarePhase(id: InitializePhaseId)
         self.buildPhase = BuildClientRequestMiddlewarePhase(id: BuildClientRequestPhaseId)
@@ -43,7 +44,8 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
     
     public mutating func replacingDeserializationTransform<DeserializationTransformType: DeserializationTransformProtocol>(
         deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType,
+    DeserializationTransformType.ContextType == MiddlewareContext {
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
     

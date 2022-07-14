@@ -19,13 +19,14 @@
 public protocol DeserializationTransformProtocol {
     associatedtype InputType
     associatedtype OutputType
+    associatedtype ContextType
     
     func transform(
-        input: InputType) async throws -> OutputType
+        input: InputType, context: ContextType) async throws -> OutputType
 }
 
 extension DeserializationTransformProtocol {
-    public func eraseToAnyDeserializationTransform() -> AnyDeserializationTransform<InputType, OutputType> {
+    public func eraseToAnyDeserializationTransform() -> AnyDeserializationTransform<InputType, OutputType, ContextType> {
         return AnyDeserializationTransform(self)
     }
 }
@@ -39,7 +40,7 @@ public protocol DeserializationTransformProtocol {
 }
 
 extension SerializationTransformProtocol {
-    public func eraseToAnyDeserializationTransform() -> any DeserializationTransform<HTTPResponseType, OutputType> {
+    public func eraseToAnyDeserializationTransform() -> any DeserializationTransform<InputType, OutputType, ContextType> {
         return self
     }
 }

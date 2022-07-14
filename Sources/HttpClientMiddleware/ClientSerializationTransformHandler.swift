@@ -26,12 +26,13 @@ where HandlerType.InputType == SerializeClientRequestMiddlewarePhaseInput<InputT
     public typealias Output = OutputType
     
     let handler: HandlerType
-    let deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType>
+    let deserializationTransform: AnyDeserializationTransform<HTTPResponseType, OutputType, MiddlewareContext>
     
     public init<DeserializationTransformType: DeserializationTransformProtocol>(
                 handler: HandlerType,
                 deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType {
+    where DeserializationTransformType.InputType == HTTPResponseType, DeserializationTransformType.OutputType == OutputType,
+    DeserializationTransformType.ContextType == MiddlewareContext {
         self.handler = handler
         self.deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
@@ -40,6 +41,6 @@ where HandlerType.InputType == SerializeClientRequestMiddlewarePhaseInput<InputT
         let serializationInput = SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>(input: input)
         
         let httpResponse = try await handler.handle(input: serializationInput, context: context)
-        return try await self.deserializationTransform.transform(input: httpResponse)
+        return try await self.deserializationTransform.transform(input: httpResponse, context: context)
     }
 }

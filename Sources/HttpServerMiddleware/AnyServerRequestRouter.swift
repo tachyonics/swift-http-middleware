@@ -21,13 +21,14 @@ import HttpMiddleware
 /// type erase the ServerRequestRouter protocol
 public struct AnyServerRouter<InputHTTPRequestType: HttpServerRequestProtocol,
                               OutputHTTPRequestType: HttpServerRequestProtocol,
-                              HTTPResponseType: HttpServerResponseProtocol>: ServerRouterProtocol {
+                              HTTPResponseType: HttpServerResponseProtocol,
+                              ContextType>: ServerRouterProtocol {
     
-    private let _select: (InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
+    private let _select: (InputHTTPRequestType, ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
 
     public init<ServerRequestRouterType: ServerRouterProtocol>(_ realServerRequestRouter: ServerRequestRouterType)
     where ServerRequestRouterType.InputHTTPRequestType == InputHTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == OutputHTTPRequestType,
-    ServerRequestRouterType.HTTPResponseType == HTTPResponseType {
+    ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == ContextType {
         if let alreadyErased = realServerRequestRouter as? AnyServerRouter {
             self = alreadyErased
             return
@@ -36,8 +37,8 @@ public struct AnyServerRouter<InputHTTPRequestType: HttpServerRequestProtocol,
         self._select = realServerRequestRouter.select
     }
 
-    public func select(httpRequest: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType> {
-        return try await self._select(httpRequest)
+    public func select(httpRequest: InputHTTPRequestType, context: ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType> {
+        return try await self._select(httpRequest, context)
     }
 }
 #else

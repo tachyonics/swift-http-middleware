@@ -17,12 +17,13 @@
 
 #if compiler(<5.7)
 /// Type erased DeserializationTransform
-public struct AnyDeserializationTransform<InputType, OutputType>: DeserializationTransformProtocol {
-    private let _handle: (InputType) async throws -> OutputType
+public struct AnyDeserializationTransform<InputType, OutputType, ContextType>: DeserializationTransformProtocol {
+    private let _handle: (InputType, ContextType) async throws -> OutputType
     
     public init<DeserializationTransformType: DeserializationTransformProtocol> (_ realDeserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == InputType, DeserializationTransformType.OutputType == OutputType {
-        if let alreadyErased = realDeserializationTransform as? AnyDeserializationTransform<InputType, OutputType> {
+    where DeserializationTransformType.InputType == InputType, DeserializationTransformType.OutputType == OutputType,
+    DeserializationTransformType.ContextType == ContextType {
+        if let alreadyErased = realDeserializationTransform as? AnyDeserializationTransform<InputType, OutputType, ContextType> {
             self = alreadyErased
             return
         }
@@ -30,8 +31,8 @@ public struct AnyDeserializationTransform<InputType, OutputType>: Deserializatio
     }
     
     public func transform(
-        input: InputType) async throws -> OutputType {
-        return try await _handle(input)
+        input: InputType, context: ContextType) async throws -> OutputType {
+        return try await _handle(input, context)
     }
 }
 #else

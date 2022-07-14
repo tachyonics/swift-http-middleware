@@ -34,13 +34,15 @@ public protocol ServerRouterProtocol {
     associatedtype InputHTTPRequestType: HttpServerRequestProtocol
     associatedtype OutputHTTPRequestType: HttpServerRequestProtocol
     associatedtype HTTPResponseType: HttpServerResponseProtocol
+    associatedtype ContextType
     
     func select(
-        httpRequest: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
+        httpRequest: InputHTTPRequestType,
+        context: ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
 }
 
 extension ServerRouterProtocol {
-    public func eraseToAnyServerRouter() -> AnyServerRouter<InputHTTPRequestType, OutputHTTPRequestType, HTTPResponseType> {
+    public func eraseToAnyServerRouter() -> AnyServerRouter<InputHTTPRequestType, OutputHTTPRequestType, HTTPResponseType, ContextType> {
         return AnyServerRouter(self)
     }
 }
