@@ -22,3 +22,22 @@ public let BuildServerResponsePhaseId = "BuildServerResponse"
 public typealias BuildServerResponseMiddlewarePhase<HTTPRequestType: HttpServerRequestProtocol,
                                                     HTTPResponseType: HttpServerResponseProtocol>
     = MiddlewarePhase<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
+
+public struct BuildServerResponsePhaseHandler<HTTPRequestType: HttpServerRequestProtocol,
+                                              RouterOutputHTTPRequestType: HttpServerRequestProtocol,
+                                              HTTPResponseType: HttpServerResponseProtocol>: MiddlewareHandlerProtocol {
+    
+    public typealias InputType = HTTPRequestType
+    
+    public typealias OutputType = HttpServerResponseBuilder<HTTPResponseType>
+    
+    let routerOutput: ServerRouterOutput<RouterOutputHTTPRequestType, HTTPResponseType>
+    
+    public init(routerOutput: ServerRouterOutput<RouterOutputHTTPRequestType, HTTPResponseType>) {
+        self.routerOutput = routerOutput
+    }
+    
+    public func handle(input: InputType, context: MiddlewareContext) async throws -> OutputType {
+        return try await routerOutput.handler.handle(input: routerOutput.httpRequest, context: context)
+    }
+}
