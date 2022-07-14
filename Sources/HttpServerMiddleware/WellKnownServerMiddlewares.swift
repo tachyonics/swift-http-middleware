@@ -26,3 +26,13 @@ public extension PingMiddlewareProtocol {
         "Ping"
     }
 }
+
+public protocol UnknownErrorMiddlewareProtocol: MiddlewareProtocol {
+    
+}
+
+public extension UnknownErrorMiddlewareProtocol {
+    var id: String {
+        "UnknownError"
+    }
+}
