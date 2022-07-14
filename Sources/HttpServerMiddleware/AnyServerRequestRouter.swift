@@ -36,8 +36,8 @@ public struct AnyServerRouter<InputHTTPRequestType: HttpServerRequestProtocol,
         self._select = realServerRequestRouter.select
     }
 
-    public func select(httpRequestType: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType> {
-        return try await self._select(httpRequestType)
+    public func select(httpRequest: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType> {
+        return try await self._select(httpRequest)
     }
 }
 #else

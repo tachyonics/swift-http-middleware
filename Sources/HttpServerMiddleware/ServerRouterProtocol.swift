@@ -36,7 +36,7 @@ public protocol ServerRouterProtocol {
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     
     func select(
-        httpRequestType: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
+        httpRequest: InputHTTPRequestType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
 }
 
 extension ServerRouterProtocol {
@@ -50,7 +50,7 @@ public protocol ServerRouterProtocol {
     associatedtype OutputType
     
     func select(
-        httpRequestType: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HTTPResponseType>
+        httpRequest: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HTTPResponseType>
 }
 
 extension ServerRouterProtocol {
