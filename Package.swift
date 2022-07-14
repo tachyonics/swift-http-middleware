@@ -22,6 +22,9 @@ let package = Package(
         .library(
             name: "StandardHttpClientMiddleware",
             targets: ["StandardHttpClientMiddleware"]),
+        .library(
+            name: "StandardHttpServerMiddleware",
+            targets: ["StandardHttpServerMiddleware"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -44,6 +47,10 @@ let package = Package(
         .target(
             name: "StandardHttpClientMiddleware", dependencies: [
                 .target(name: "HttpClientMiddleware")
+            ]),
+        .target(
+            name: "StandardHttpServerMiddleware", dependencies: [
+                .target(name: "HttpServerMiddleware")
             ]),
     ],
     swiftLanguageVersions: [.v5]

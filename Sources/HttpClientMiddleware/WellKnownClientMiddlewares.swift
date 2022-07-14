@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  WellKnownClientRequestMiddlewares.swift
+//  WellKnownClientMiddlewares.swift
 //  HttpClientMiddleware
 //
 
@@ -27,27 +27,6 @@ public extension AcceptHeaderMiddlewareProtocol {
     }
 }
 
-public protocol ContentLengthMiddlewareProtocol: MiddlewareProtocol {
-    
-}
-
-public extension ContentLengthMiddlewareProtocol {
-    var id: String {
-        "ContentLength"
-    }
-}
-
-
-public protocol ContentTypeMiddlewareProtocol: MiddlewareProtocol {
-    
-}
-
-public extension ContentTypeMiddlewareProtocol {
-    var id: String {
-        "ContentType"
-    }
-}
-
 
 public protocol QueryItemMiddlewareProtocol: MiddlewareProtocol {
     
@@ -56,17 +35,6 @@ public protocol QueryItemMiddlewareProtocol: MiddlewareProtocol {
 public extension QueryItemMiddlewareProtocol {
     var id: String {
         "QueryItem"
-    }
-}
-
-
-public protocol RequestBodyMiddlewareProtocol: MiddlewareProtocol {
-    
-}
-
-public extension RequestBodyMiddlewareProtocol {
-    var id: String {
-        "RequestBody"
     }
 }
 
