@@ -59,11 +59,10 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
     
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware(input: HTTPRequestType, context: MiddlewareContext) async -> HTTPResponseType {
+        let build = buildPhase.compose(next: BuildServerResponsePhaseHandler(router: self.router))
+        let finalize = finalizePhase.compose(next: FinalizeServerResponsePhaseHandler(handler: build))
+        
         do {
-            let routerOutput = try await self.router.select(httpRequest: input, context: context)
-            let build = buildPhase.compose(next: BuildServerResponsePhaseHandler(routerOutput: routerOutput))
-            let finalize = finalizePhase.compose(next: FinalizeServerResponsePhaseHandler(handler: build))
-            
             return try await finalize.handle(input: input, context: context)
         } catch {
             return self.unknownErrorHandlerType.handle(request: input, error: error, context: context)

@@ -31,13 +31,15 @@ public struct BuildServerResponsePhaseHandler<HTTPRequestType: HttpServerRequest
     
     public typealias OutputType = HttpServerResponseBuilder<HTTPResponseType>
     
-    let routerOutput: ServerRouterOutput<RouterOutputHTTPRequestType, HTTPResponseType>
+    let router: AnyServerRouter<HTTPRequestType, RouterOutputHTTPRequestType, HTTPResponseType, MiddlewareContext>
     
-    public init(routerOutput: ServerRouterOutput<RouterOutputHTTPRequestType, HTTPResponseType>) {
-        self.routerOutput = routerOutput
+    public init(router: AnyServerRouter<HTTPRequestType, RouterOutputHTTPRequestType, HTTPResponseType, MiddlewareContext>) {
+        self.router = router
     }
     
     public func handle(input: InputType, context: MiddlewareContext) async throws -> OutputType {
+        let routerOutput = try await self.router.select(httpRequest: input, context: context)
+        
         return try await routerOutput.handler.handle(input: routerOutput.httpRequest, context: context)
     }
 }
