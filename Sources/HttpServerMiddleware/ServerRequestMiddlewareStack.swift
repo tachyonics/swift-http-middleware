@@ -18,7 +18,7 @@
 import HttpMiddleware
 
 public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
-    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType, MiddlewareContext>
+    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPRequestType, HTTPResponseType, MiddlewareContext>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
@@ -28,7 +28,8 @@ public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestPro
     public init<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
         id: String,
         unknownErrorHandlerType: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
+    where UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,
+    UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
         self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
@@ -37,7 +38,8 @@ public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestPro
     
     public mutating func replacingUnknownErrorHandler<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
         unknownErrorHandlerType: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
+    where UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,
+          UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
     }
     
@@ -53,7 +55,7 @@ public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestPro
         do {
             return try await finalize.handle(input: input, context: context)
         } catch {
-            return self.unknownErrorHandlerType.handle(error: error, context: context)
+            return self.unknownErrorHandlerType.handle(request: input, error: error, context: context)
         }
     }
 }

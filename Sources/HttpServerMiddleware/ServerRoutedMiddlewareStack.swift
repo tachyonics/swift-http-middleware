@@ -20,7 +20,7 @@ import HttpMiddleware
 public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol,
                                           RouterOutputHTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
     public var router: AnyServerRouter<HTTPRequestType, RouterOutputHTTPRequestType, HTTPResponseType, MiddlewareContext>
-    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType, MiddlewareContext>
+    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPRequestType, HTTPResponseType, MiddlewareContext>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
@@ -34,6 +34,7 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
                     unknownErrorHandlerType: UnknownErrorHandlerType)
     where ServerRequestRouterType.InputHTTPRequestType == HTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == RouterOutputHTTPRequestType,
     ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == MiddlewareContext,
+    UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,
     UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
@@ -45,13 +46,14 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
     public mutating func replacingRouter<ServerRequestRouterType: ServerRouterProtocol>(
         router: ServerRequestRouterType)
     where ServerRequestRouterType.InputHTTPRequestType == HTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == RouterOutputHTTPRequestType,
-        ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == MiddlewareContext {
+    ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == MiddlewareContext {
         self.router = router.eraseToAnyServerRouter()
     }
     
     public mutating func replacingUnknownErrorHandler<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
         unknownErrorHandlerType: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
+    where UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,
+    UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
     }
     
@@ -64,7 +66,7 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
             
             return try await finalize.handle(input: input, context: context)
         } catch {
-            return self.unknownErrorHandlerType.handle(error: error, context: context)
+            return self.unknownErrorHandlerType.handle(request: input, error: error, context: context)
         }
     }
 }
