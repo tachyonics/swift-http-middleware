@@ -18,24 +18,25 @@
 #if compiler(<5.7)
 public protocol UnknownErrorHandlerProtocol {
     associatedtype HTTPResponseType: HttpServerResponseProtocol
+    associatedtype ContextType
     
-    func handle(error: Swift.Error) -> HTTPResponseType
+    func handle(error: Swift.Error, context: ContextType) -> HTTPResponseType
 }
 
 extension UnknownErrorHandlerProtocol {
-    public func eraseToAnyUnknownErrorHandler() -> AnyUnknownErrorHandler<HTTPResponseType> {
+    public func eraseToAnyUnknownErrorHandler() -> AnyUnknownErrorHandler<HTTPResponseType, ContextType> {
         return AnyUnknownErrorHandler(self)
     }
 }
 #else
-public protocol UnknownErrorHandlerProtocol<HTTPResponseType> {
+public protocol UnknownErrorHandlerProtocol<HTTPResponseType, ContextType> {
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     
     func handle(error: Swift.Error) -> HTTPResponseType
 }
 
 extension UnknownErrorHandlerProtocol {
-    public func eraseToAnyUnknownErrorHandler() -> any AnyUnknownErrorHandler<HTTPResponseType> {
+    public func eraseToAnyUnknownErrorHandler() -> any AnyUnknownErrorHandler<HTTPResponseType, ContextType> {
         return self
     }
 }

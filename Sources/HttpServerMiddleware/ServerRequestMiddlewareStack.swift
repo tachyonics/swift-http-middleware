@@ -18,7 +18,7 @@
 import HttpMiddleware
 
 public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
-    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType>
+    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType, MiddlewareContext>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
@@ -28,10 +28,16 @@ public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestPro
     public init<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
         id: String,
         unknownErrorHandlerType: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType {
+    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
         self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
+        self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
+    }
+    
+    public mutating func replacingUnknownErrorHandler<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
+        unknownErrorHandlerType: UnknownErrorHandlerType)
+    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
     }
     
@@ -47,7 +53,7 @@ public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestPro
         do {
             return try await finalize.handle(input: input, context: context)
         } catch {
-            return self.unknownErrorHandlerType.handle(error: error)
+            return self.unknownErrorHandlerType.handle(error: error, context: context)
         }
     }
 }

@@ -19,12 +19,12 @@ import HttpMiddleware
 
 #if compiler(<5.7)
 /// type erase the UnknownErrorHandlerProtocol protocol
-public struct AnyUnknownErrorHandler<HTTPResponseType: HttpServerResponseProtocol>: UnknownErrorHandlerProtocol {
+public struct AnyUnknownErrorHandler<HTTPResponseType: HttpServerResponseProtocol, ContextType>: UnknownErrorHandlerProtocol {
     
-    private let _handle: (Swift.Error) -> HTTPResponseType
+    private let _handle: (Swift.Error, ContextType) -> HTTPResponseType
 
     public init<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(_ realUnknownErrorHandler: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType {
+    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == ContextType {
         if let alreadyErased = realUnknownErrorHandler as? AnyUnknownErrorHandler {
             self = alreadyErased
             return
@@ -33,8 +33,8 @@ public struct AnyUnknownErrorHandler<HTTPResponseType: HttpServerResponseProtoco
         self._handle = realUnknownErrorHandler.handle
     }
 
-    public func handle(error: Swift.Error) -> HTTPResponseType {
-        return self._handle(error)
+    public func handle(error: Swift.Error, context: ContextType) -> HTTPResponseType {
+        return self._handle(error, context)
     }
 }
 #else

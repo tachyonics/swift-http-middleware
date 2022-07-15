@@ -20,7 +20,7 @@ import HttpMiddleware
 public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol,
                                           RouterOutputHTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
     public var router: AnyServerRouter<HTTPRequestType, RouterOutputHTTPRequestType, HTTPResponseType, MiddlewareContext>
-    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType>
+    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType, MiddlewareContext>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
@@ -34,7 +34,7 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
                     unknownErrorHandlerType: UnknownErrorHandlerType)
     where ServerRequestRouterType.InputHTTPRequestType == HTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == RouterOutputHTTPRequestType,
     ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == MiddlewareContext,
-    UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType {
+    UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
         self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
@@ -49,6 +49,12 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
         self.router = router.eraseToAnyServerRouter()
     }
     
+    public mutating func replacingUnknownErrorHandler<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
+        unknownErrorHandlerType: UnknownErrorHandlerType)
+    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
+        self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
+    }
+    
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware(input: HTTPRequestType, context: MiddlewareContext) async -> HTTPResponseType {
         do {
@@ -58,7 +64,7 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
             
             return try await finalize.handle(input: input, context: context)
         } catch {
-            return self.unknownErrorHandlerType.handle(error: error)
+            return self.unknownErrorHandlerType.handle(error: error, context: context)
         }
     }
 }
