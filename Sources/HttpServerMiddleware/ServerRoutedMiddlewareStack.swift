@@ -20,20 +20,26 @@ import HttpMiddleware
 public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol,
                                           RouterOutputHTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
     public var router: AnyServerRouter<HTTPRequestType, RouterOutputHTTPRequestType, HTTPResponseType, MiddlewareContext>
+    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
     public var buildPhase: BuildServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     public var finalizePhase: FinalizeServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
-    public init<ServerRequestRouterType: ServerRouterProtocol>(id: String,
-                router: ServerRequestRouterType)
+    public init<ServerRequestRouterType: ServerRouterProtocol,
+                UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
+                    id: String,
+                    router: ServerRequestRouterType,
+                    unknownErrorHandlerType: UnknownErrorHandlerType)
     where ServerRequestRouterType.InputHTTPRequestType == HTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == RouterOutputHTTPRequestType,
-    ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == MiddlewareContext {
+    ServerRequestRouterType.HTTPResponseType == HTTPResponseType, ServerRequestRouterType.ContextType == MiddlewareContext,
+    UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
         self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
         self.router = router.eraseToAnyServerRouter()
+        self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
     }
     
     public mutating func replacingRouter<ServerRequestRouterType: ServerRouterProtocol>(
@@ -44,11 +50,15 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
-    public func handleMiddleware(input: HTTPRequestType, context: MiddlewareContext) async throws -> HTTPResponseType {
-        let routerOutput = try await self.router.select(httpRequest: input, context: context)
-        let build = buildPhase.compose(next: BuildServerResponsePhaseHandler(routerOutput: routerOutput))
-        let finalize = finalizePhase.compose(next: FinalizeServerResponsePhaseHandler(handler: build))
-              
-        return try await finalize.handle(input: input, context: context)
+    public func handleMiddleware(input: HTTPRequestType, context: MiddlewareContext) async -> HTTPResponseType {
+        do {
+            let routerOutput = try await self.router.select(httpRequest: input, context: context)
+            let build = buildPhase.compose(next: BuildServerResponsePhaseHandler(routerOutput: routerOutput))
+            let finalize = finalizePhase.compose(next: FinalizeServerResponsePhaseHandler(handler: build))
+            
+            return try await finalize.handle(input: input, context: context)
+        } catch {
+            return self.unknownErrorHandlerType.handle(error: error)
+        }
     }
 }

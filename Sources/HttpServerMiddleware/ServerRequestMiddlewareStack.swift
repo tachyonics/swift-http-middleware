@@ -18,27 +18,36 @@
 import HttpMiddleware
 
 public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
+    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPResponseType>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
     public var buildPhase: BuildServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     public var finalizePhase: FinalizeServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
-    public init(id: String) {
+    public init<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
+        id: String,
+        unknownErrorHandlerType: UnknownErrorHandlerType)
+    where UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType {
         self.id = id
         self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
         self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
+        self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
     public func handleMiddleware<HandlerType: MiddlewareHandlerProtocol>(
                                              input: HTTPRequestType,
                                              context: MiddlewareContext,
-                                             next: HandlerType) async throws -> HTTPResponseType
+                                             next: HandlerType) async -> HTTPResponseType
     where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HttpServerResponseBuilder<HTTPResponseType> {
         let build = buildPhase.compose(next: next)
         let finalize = finalizePhase.compose(next: FinalizeServerResponsePhaseHandler(handler: build))
               
-        return try await finalize.handle(input: input, context: context)
+        do {
+            return try await finalize.handle(input: input, context: context)
+        } catch {
+            return self.unknownErrorHandlerType.handle(error: error)
+        }
     }
 }
