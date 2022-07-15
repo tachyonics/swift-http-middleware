@@ -17,5 +17,11 @@
 
 public struct SerializeServerResponseMiddlewarePhaseOutput<OperationResponseType, HTTPResponseType: HttpServerResponseProtocol> {
     public let operationResponse: OperationResponseType
-    public let builder: HttpServerResponseBuilder<HTTPResponseType> = HttpServerResponseBuilder()
+    public let builder: HttpServerResponseBuilder<HTTPResponseType>
+    
+    public init(operationResponse: OperationResponseType,
+                builder: HttpServerResponseBuilder<HTTPResponseType> = HttpServerResponseBuilder()) {
+        self.operationResponse = operationResponse
+        self.builder = builder
+    }
 }
