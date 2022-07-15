@@ -22,9 +22,8 @@ public struct ServerOperationHandler<HandlerType: MiddlewareHandlerProtocol, HTT
     private let middleware: SingleServerOperationMiddlewareStack<HandlerType.InputType, HandlerType.OutputType,
                                                                  HTTPRequestType, HTTPResponseType>
     
-    public init(next: HandlerType,
-                middleware: SingleServerOperationMiddlewareStack<InputType, OutputType, HTTPRequestType, HTTPResponseType>)
-    where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
+    public init(middleware: SingleServerOperationMiddlewareStack<HandlerType.InputType, HandlerType.OutputType, HTTPRequestType, HTTPResponseType>,
+                next: HandlerType) {
         self.next = next
         self.middleware = middleware
     }
