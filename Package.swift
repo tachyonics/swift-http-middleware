@@ -3,6 +3,13 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting]
+#if compiler(<5.6)
+swiftSettings = []
+#else
+swiftSettings = [.unsafeFlags(["-warn-concurrency"])]
+#endif
+
 let package = Package(
     name: "swift-http-client-middleware",
     platforms: [
@@ -37,23 +44,33 @@ let package = Package(
         .target(
             name: "HttpMiddleware", dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-            ]),
+            ],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "HttpClientMiddleware", dependencies: [
                 .target(name: "HttpMiddleware")
-            ]),
+            ],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "HttpServerMiddleware", dependencies: [
                 .target(name: "HttpMiddleware")
-            ]),
+            ],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "StandardHttpClientMiddleware", dependencies: [
                 .target(name: "HttpClientMiddleware")
-            ]),
+            ],
+            swiftSettings: swiftSettings
+        ),
         .target(
             name: "StandardHttpServerMiddleware", dependencies: [
                 .target(name: "HttpServerMiddleware")
-            ]),
+            ],
+            swiftSettings: swiftSettings
+        ),
     ],
     swiftLanguageVersions: [.v5]
 )

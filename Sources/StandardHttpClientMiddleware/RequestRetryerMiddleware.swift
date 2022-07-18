@@ -15,7 +15,7 @@
 import HttpMiddleware
 import HttpClientMiddleware
 
-public enum RequestRetryerResult<HTTPResponseType: HttpClientResponseProtocol> {
+public enum RequestRetryerResult<HTTPResponseType: HttpClientResponseProtocol>: _MiddlewareSendable {
     case response(HTTPResponseType)
     case error(cause: Swift.Error, code: UInt)
 }

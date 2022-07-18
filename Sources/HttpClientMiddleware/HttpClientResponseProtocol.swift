@@ -15,6 +15,8 @@
 //  HttpClientMiddleware
 //
 
-public protocol HttpClientResponseProtocol {
+import HttpMiddleware
+
+public protocol HttpClientResponseProtocol: _MiddlewareSendableProtocol {
     var statusCode: UInt { get }
 }

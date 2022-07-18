@@ -11,17 +11,14 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  HttpClientRequestProtocol.swift
-//  HttpClientMiddleware
+//  ProtocolType.swift
+//  HttpMiddleware
 //
 
-import HttpMiddleware
-
-public protocol HttpClientRequestProtocol: _MiddlewareSendableProtocol {
-    associatedtype HeadersType: HttpHeadersProtocol
-    associatedtype BodyType: HTTPBodyProtocol
-    associatedtype AdditionalRequestPropertiesType
-    
-    init(method: HttpMethod, endpoint: Endpoint, headers: HeadersType, body: BodyType?,
-         additionalRequestProperties: AdditionalRequestPropertiesType?) throws
-}
+#if compiler(>=5.6)
+public typealias _MiddlewareSendable = Sendable
+public protocol _MiddlewareSendableProtocol: Sendable {}
+#else
+public typealias _MiddlewareSendable = Any
+public protocol _MiddlewareSendableProtocol {}
+#endif
