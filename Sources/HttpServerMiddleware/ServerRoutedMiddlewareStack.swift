@@ -18,7 +18,7 @@
 import HttpMiddleware
 
 public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol,
-                                          RouterOutputHTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol> {
+                                          RouterOutputHTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol>: Sendable {
     public var router: AnyServerRouter<HTTPRequestType, RouterOutputHTTPRequestType, HTTPResponseType, MiddlewareContext>
     private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPRequestType, HTTPResponseType, MiddlewareContext>
     

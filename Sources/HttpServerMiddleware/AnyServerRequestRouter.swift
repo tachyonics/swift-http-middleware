@@ -22,9 +22,9 @@ import HttpMiddleware
 public struct AnyServerRouter<InputHTTPRequestType: HttpServerRequestProtocol,
                               OutputHTTPRequestType: HttpServerRequestProtocol,
                               HTTPResponseType: HttpServerResponseProtocol,
-                              ContextType>: ServerRouterProtocol {
+                              ContextType>: ServerRouterProtocol, Sendable {
     
-    private let _select: (InputHTTPRequestType, ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
+    private let _select: @Sendable (InputHTTPRequestType, ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
 
     public init<ServerRequestRouterType: ServerRouterProtocol>(_ realServerRequestRouter: ServerRequestRouterType)
     where ServerRequestRouterType.InputHTTPRequestType == InputHTTPRequestType, ServerRequestRouterType.OutputHTTPRequestType == OutputHTTPRequestType,

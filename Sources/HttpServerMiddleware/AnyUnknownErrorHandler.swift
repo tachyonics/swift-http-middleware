@@ -21,9 +21,9 @@ import HttpMiddleware
 /// type erase the UnknownErrorHandlerProtocol protocol
 public struct AnyUnknownErrorHandler<HTTPRequestType: HttpServerRequestProtocol,
                                      HTTPResponseType: HttpServerResponseProtocol,
-                                     ContextType>: UnknownErrorHandlerProtocol {
+                                     ContextType>: UnknownErrorHandlerProtocol, Sendable {
     
-    private let _handle: (HTTPRequestType, Swift.Error, ContextType) -> HTTPResponseType
+    private let _handle: @Sendable (HTTPRequestType, Swift.Error, ContextType) -> HTTPResponseType
 
     public init<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(_ realUnknownErrorHandler: UnknownErrorHandlerType)
     where UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,

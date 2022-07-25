@@ -15,7 +15,7 @@
 //  HttpMiddleware
 //
 
-public enum ProtocolType: String, CaseIterable {
+public enum ProtocolType: String, CaseIterable, Sendable {
     case http
     case https
 }

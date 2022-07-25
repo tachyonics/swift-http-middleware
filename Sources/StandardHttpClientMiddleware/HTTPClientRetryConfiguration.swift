@@ -24,7 +24,7 @@ private let millisecondsToNanoSeconds: UInt32 = 1000000
 /**
  Retry configuration for the requests made by a HTTPClient.
  */
-public struct HTTPClientRetryConfiguration {
+public struct HTTPClientRetryConfiguration: Sendable {
     // Number of retries to be attempted
     public let numRetries: Int
     // First interval of retry in millis

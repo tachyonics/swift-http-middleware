@@ -26,13 +26,14 @@ public struct MiddlewareContext {
 }
 
 #if compiler(<5.7)
-public protocol MiddlewareProtocol {
+public protocol MiddlewareProtocol: Sendable {
     associatedtype InputType
     associatedtype OutputType
     
     /// The middleware ID
     var id: String { get }
     
+    @Sendable
     func handle<HandlerType: MiddlewareHandlerProtocol>(
         input: InputType,
         context: MiddlewareContext,
@@ -53,6 +54,7 @@ public protocol MiddlewareProtocol<HTTPRequestType, HTTPResponseType> {
     /// The middleware ID
     var id: String { get }
     
+    @Sendable
     func handle<HandlerType: HandlerProtocol>(
         input: InputType,
         next: HandlerType) async throws -> OutputType

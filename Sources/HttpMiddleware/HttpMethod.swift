@@ -1,6 +1,6 @@
 
 // this should not be here
-public enum HttpMethod: Equatable {
+public enum HttpMethod: Equatable, Sendable {
     internal enum HasBody {
         case yes
         case no

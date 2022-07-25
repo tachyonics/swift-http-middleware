@@ -21,6 +21,7 @@ public protocol UnknownErrorHandlerProtocol {
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     associatedtype ContextType
     
+    @Sendable
     func handle(request: HTTPRequestType, error: Swift.Error, context: ContextType) -> HTTPResponseType
 }
 
@@ -33,6 +34,7 @@ extension UnknownErrorHandlerProtocol {
 public protocol UnknownErrorHandlerProtocol<HTTPRequestType, HTTPResponseType, ContextType> {
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     
+    @Sendable
     func handle(error: Swift.Error) -> HTTPResponseType
 }
 

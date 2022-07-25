@@ -17,9 +17,9 @@
 
 #if compiler(<5.7)
 /// type erase the Middleware protocol
-public struct AnyMiddleware<InputType, OutputType>: MiddlewareProtocol {
+public struct AnyMiddleware<InputType, OutputType>: MiddlewareProtocol, Sendable {
     
-    private let _handle: (InputType, MiddlewareContext,
+    private let _handle: @Sendable (InputType, MiddlewareContext,
                           AnyMiddlewareHandler<InputType, OutputType>) async throws -> OutputType
 
     public var id: String

@@ -30,10 +30,10 @@ public struct RequestRetryerMiddleware<HTTPRequestType: HttpClientRequestProtoco
     public typealias OutputType = HTTPResponseType
     
     private let retryConfiguration: HTTPClientRetryConfiguration
-    private let errorStatusFunction: (Swift.Error) -> (isRetriable: Bool, code: UInt)
+    private let errorStatusFunction: @Sendable (Swift.Error) -> (isRetriable: Bool, code: UInt)
     
     public init(retryConfiguration: HTTPClientRetryConfiguration,
-                errorStatusFunction: @escaping (Swift.Error) -> (isRetriable: Bool, code: UInt)) {
+                errorStatusFunction: @escaping @Sendable (Swift.Error) -> (isRetriable: Bool, code: UInt)) {
         self.retryConfiguration = retryConfiguration
         self.errorStatusFunction = errorStatusFunction
     }

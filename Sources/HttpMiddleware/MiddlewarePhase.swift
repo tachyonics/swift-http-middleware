@@ -15,7 +15,7 @@
 //  HttpMiddleware
 //
 
-public struct MiddlewarePhase<InputType, OutputType> {
+public struct MiddlewarePhase<InputType, OutputType>: Sendable {
     var orderedMiddleware: OrderedGroup<AnyMiddleware<InputType, OutputType>> = OrderedGroup()
     
     public let id: String

@@ -36,6 +36,7 @@ public protocol ServerRouterProtocol {
     associatedtype HTTPResponseType: HttpServerResponseProtocol
     associatedtype ContextType
     
+    @Sendable
     func select(
         httpRequest: InputHTTPRequestType,
         context: ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
@@ -51,6 +52,7 @@ public protocol ServerRouterProtocol {
     associatedtype HTTPResponseType: HttpClientResponseProtocol
     associatedtype OutputType
     
+    @Sendable
     func select(
         httpRequest: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HTTPResponseType>
 }

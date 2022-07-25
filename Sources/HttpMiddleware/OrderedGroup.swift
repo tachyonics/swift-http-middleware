@@ -60,7 +60,7 @@ struct RelativeOrder {
     }
 }
 
-public struct OrderedGroup<MiddlewareType: MiddlewareProtocol> {
+public struct OrderedGroup<MiddlewareType: MiddlewareProtocol>: Sendable {
     // order of the keys
     var order = RelativeOrder()
     // key here is name of the middleware aka the id property of the middleware
