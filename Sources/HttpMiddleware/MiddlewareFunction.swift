@@ -15,5 +15,5 @@
 //  HttpMiddleware
 //
 
-public typealias MiddlewareFunction<InputType, OutputType> =
-    @Sendable (InputType, MiddlewareContext, AnyMiddlewareHandler<InputType, OutputType>) async throws -> OutputType
+//public typealias MiddlewareFunction<InputType, OutputType> =
+//    @Sendable (InputType, MiddlewareContext, AnyMiddlewareHandler<InputType, OutputType>) async throws -> OutputType

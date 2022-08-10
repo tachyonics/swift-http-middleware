@@ -14,7 +14,7 @@
 //  HttpServerResponseBuilder.swift
 //  HttpServerMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public class HttpServerResponseBuilder<HTTPResponseType: HttpServerResponseProtocol> {
@@ -78,3 +78,4 @@ public class HttpServerResponseBuilder<HTTPResponseType: HttpServerResponseProto
                                     additionalResponseProperties: self.additionalResponseProperties)
     }
 }
+*/

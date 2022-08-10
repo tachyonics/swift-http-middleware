@@ -16,7 +16,7 @@
 //
 
 /// used to create middleware from a middleware function
-struct WrappedMiddleware<InputType, OutputType>: MiddlewareProtocol {
+/*struct WrappedMiddleware<InputType, OutputType>: MiddlewareProtocol {
     let _middleware: MiddlewareFunction<InputType, OutputType>
     var id: String
     
@@ -32,4 +32,4 @@ struct WrappedMiddleware<InputType, OutputType>: MiddlewareProtocol {
     where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
         return try await _middleware(input, context, next.eraseToAnyHandler())
     }
-}
+}*/

@@ -14,7 +14,7 @@
 //  FinalizeClientRequestMiddlewarePhase.swift
 //  HttpClientMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public let FinalizeClientRequestPhaseId = "FinalizeClientRequest"
@@ -42,3 +42,4 @@ where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HTTPRe
         return try await handler.handle(input: input.build(), context: context)
     }
 }
+*/

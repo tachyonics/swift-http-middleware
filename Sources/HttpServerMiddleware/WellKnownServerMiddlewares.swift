@@ -15,6 +15,7 @@
 //  HttpServerMiddleware
 //
 
+import SwiftMiddleware
 import HttpMiddleware
 
 public protocol PingMiddlewareProtocol: MiddlewareProtocol {

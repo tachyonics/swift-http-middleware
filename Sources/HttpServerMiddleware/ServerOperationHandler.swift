@@ -14,7 +14,7 @@
 //  HttpServerMiddleware
 //
 
-import HttpMiddleware
+import SwiftMiddleware
 
 public struct ServerOperationHandler<HandlerType: MiddlewareHandlerProtocol, HTTPRequestType: HttpServerRequestProtocol,
                                      HTTPResponseType: HttpServerResponseProtocol>: MiddlewareHandlerProtocol {
@@ -39,3 +39,4 @@ public struct ServerOperationHandler<HandlerType: MiddlewareHandlerProtocol, HTT
         return try await handlerOutput.handle(input: input, context: context)
     }
 }
+

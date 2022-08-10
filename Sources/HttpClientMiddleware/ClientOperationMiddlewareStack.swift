@@ -14,7 +14,7 @@
 //  ClientOperationMiddlewareStack.swift
 //  HttpClientMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public let InitializePhaseId = "Initialize"
@@ -78,3 +78,4 @@ public struct ClientOperationMiddlewareStack<InputType, OutputType, HTTPRequestT
         return input
     }
 }
+*/

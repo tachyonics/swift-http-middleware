@@ -12,13 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftMiddleware
 import HttpMiddleware
 import HttpServerMiddleware
 
 public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpServerRequestProtocol,
-                                            HTTPResponseType: HttpServerResponseProtocol>: ContentTypeMiddlewareProtocol {
+                                            HTTPResponseBuilderType: HttpServerResponseBuilderProtocol>: ContentTypeMiddlewareProtocol {
     public typealias InputType = HTTPRequestType
-    public typealias OutputType = HttpServerResponseBuilder<HTTPResponseType>
+    public typealias OutputType = HTTPResponseBuilderType
     
     private let contentType: String
     private let omitHeaderForZeroLengthBody: Bool
@@ -31,9 +32,9 @@ public struct ContentLengthHeaderMiddleware<HTTPRequestType: HttpServerRequestPr
     
     public func handle<HandlerType>(input: HTTPRequestType,
                                     context: MiddlewareContext, next: HandlerType) async throws
-    -> HttpServerResponseBuilder<HTTPResponseType>
+    -> HTTPResponseBuilderType
     where HandlerType : MiddlewareHandlerProtocol, HTTPRequestType == HandlerType.InputType,
-    HttpServerResponseBuilder<HTTPResponseType> == HandlerType.OutputType {
+    HTTPResponseBuilderType == HandlerType.OutputType {
         let builder = try await next.handle(input: input, context: context)
         
         if let knownLength = builder.body?.knownLength, knownLength != 0 || !self.omitHeaderForZeroLengthBody {

@@ -11,22 +11,17 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  FinalizeServerResponseMiddlewarePhase.swift
+//  FinalizeServerResponsePhaseHandler.swift
 //  HttpServerMiddleware
 //
 
-import HttpMiddleware
-
-public let FinalizeServerResponsePhaseId = "FinalizeServerResponse"
-
-public typealias FinalizeServerResponseMiddlewarePhase<HTTPRequestType: HttpServerRequestProtocol,
-                                                       HTTPResponseType: HttpServerResponseProtocol>
-    = MiddlewarePhase<HTTPRequestType, HTTPResponseType>
+import SwiftMiddleware
 
 public struct FinalizeServerResponsePhaseHandler<HTTPRequestType: HttpServerRequestProtocol,
                                                  HTTPResponseType: HttpServerResponseProtocol,
                                                  HandlerType: MiddlewareHandlerProtocol>: MiddlewareHandlerProtocol
-where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HttpServerResponseBuilder<HTTPResponseType> {
+where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType: HttpServerResponseBuilderProtocol,
+HandlerType.OutputType.HTTPResponseType == HTTPResponseType {
     
     public typealias InputType = HTTPRequestType
     

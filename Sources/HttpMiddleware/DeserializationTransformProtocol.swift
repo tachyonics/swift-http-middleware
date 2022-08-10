@@ -16,7 +16,7 @@
 //
 
 #if compiler(<5.7)
-public protocol DeserializationTransformProtocol {
+public protocol DeserializationTransformProtocol: Sendable {
     associatedtype InputType
     associatedtype OutputType
     associatedtype ContextType
@@ -31,16 +31,17 @@ extension DeserializationTransformProtocol {
     }
 }
 #else
-public protocol DeserializationTransformProtocol {
-    associatedtype HTTPResponseType: HttpClientResponseProtocol
+public protocol DeserializationTransformProtocol<InputType, OutputType, ContextType>: Sendable {
+    associatedtype InputType
     associatedtype OutputType
+    associatedtype ContextType
     
     func transform(
-        input: HTTPResponseType) async throws -> OutputType
+        input: InputType, context: ContextType) async throws -> OutputType
 }
 
-extension SerializationTransformProtocol {
-    public func eraseToAnyDeserializationTransform() -> any DeserializationTransform<InputType, OutputType, ContextType> {
+extension DeserializationTransformProtocol {
+    public func eraseToAnyDeserializationTransform() -> any DeserializationTransformProtocol<InputType, OutputType, ContextType> {
         return self
     }
 }

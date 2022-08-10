@@ -14,7 +14,7 @@
 //  ServerRoutedMiddlewareStack.swift
 //  HttpServerMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol,
@@ -69,3 +69,4 @@ public struct ServerRoutedMiddlewareStack<HTTPRequestType: HttpServerRequestProt
         }
     }
 }
+*/

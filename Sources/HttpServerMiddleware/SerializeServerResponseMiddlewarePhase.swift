@@ -15,6 +15,9 @@
 //  HttpServerMiddleware
 //
 
+import SwiftMiddleware
+/*
+import SwiftMiddleware
 import HttpMiddleware
 
 public let SerializeServerResponsePhaseId = "SerializeServerResponse"
@@ -23,16 +26,17 @@ public typealias SerializeServerResponseMiddlewarePhase<OutputType,
                                                HTTPRequestType: HttpServerRequestProtocol,
                                                HTTPResponseType: HttpServerResponseProtocol>
     = MiddlewarePhase<HTTPRequestType, SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType>>
-
+*/
 public struct SerializeServerResponsePhaseHandler<OutputType,
                                                   HTTPRequestType: HttpServerRequestProtocol,
-                                                  HTTPResponseType: HttpServerResponseProtocol,
+                                                  HTTPResponseBuilderType: HttpServerResponseBuilderProtocol,
                                                   HandlerType: MiddlewareHandlerProtocol>: MiddlewareHandlerProtocol
-where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType> {
+where HandlerType.InputType == HTTPRequestType,
+      HandlerType.OutputType == SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseBuilderType> {
     
     public typealias InputType = HTTPRequestType
     
-    public typealias OutputType = HttpServerResponseBuilder<HTTPResponseType>
+    public typealias OutputType = HTTPResponseBuilderType
     
     let handler: HandlerType
     
@@ -40,7 +44,7 @@ where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == Serial
         self.handler = handler
     }
     
-    public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
+    public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> HTTPResponseBuilderType {
         let phaseOutput = try await handler.handle(input: input, context: context)
         
         return phaseOutput.builder

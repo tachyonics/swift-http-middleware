@@ -15,13 +15,13 @@
 //  HttpServerMiddleware
 //
 
-public struct SerializeServerResponseMiddlewarePhaseOutput<OperationResponseType, HTTPResponseType: HttpServerResponseProtocol> {
+public struct SerializeServerResponseMiddlewarePhaseOutput<OperationResponseType, HTTPResponseBuilderType: HttpServerResponseBuilderProtocol> {
     // the operational response can be nil if a response was created without actually calling the operation
     public let operationResponse: OperationResponseType?
-    public let builder: HttpServerResponseBuilder<HTTPResponseType>
+    public let builder: HTTPResponseBuilderType
     
     public init(operationResponse: OperationResponseType? = nil,
-                builder: HttpServerResponseBuilder<HTTPResponseType> = HttpServerResponseBuilder()) {
+                builder: HTTPResponseBuilderType = .init()) {
         self.operationResponse = operationResponse
         self.builder = builder
     }

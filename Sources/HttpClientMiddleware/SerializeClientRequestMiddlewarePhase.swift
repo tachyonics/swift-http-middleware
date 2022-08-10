@@ -14,7 +14,7 @@
 //  SerializeClientRequestMiddlewarePhase.swift
 //  HttpClientMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public let SerializeClientRequestPhaseId = "SerializeClientRequest"
@@ -43,4 +43,4 @@ where HandlerType.InputType == HttpClientRequestBuilder<HTTPRequestType>, Handle
     public func handle(input: SerializeClientRequestMiddlewarePhaseInput<InputType, HTTPRequestType>, context: MiddlewareContext) async throws -> OutputType {
         return try await handler.handle(input: input.builder, context: context)
     }
-}
+}*/

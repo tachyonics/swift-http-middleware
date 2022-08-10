@@ -15,7 +15,7 @@
 //  HttpClientMiddleware
 //
 
-import HttpMiddleware
+import SwiftMiddleware
 
 public protocol AcceptHeaderMiddlewareProtocol: MiddlewareProtocol {
     

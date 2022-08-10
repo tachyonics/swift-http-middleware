@@ -14,7 +14,7 @@
 //  ServerRouterProtocol.swift
 //  HttpServerMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public struct ServerRouterOutput<HTTPRequestType: HttpServerRequestProtocol,
@@ -63,3 +63,4 @@ extension ServerRouterProtocol {
     }
 }
 #endif
+*/

@@ -15,27 +15,29 @@
 //  HttpServerMiddleware
 //
 
+import SwiftMiddleware
 import HttpMiddleware
 
 public struct ServerSerializationTransformHandler<InputType, OutputType, HTTPRequestType: HttpServerRequestProtocol,
-                                                  HTTPResponseType: HttpServerResponseProtocol,
-                                                  HandlerType: MiddlewareHandlerProtocol>: MiddlewareHandlerProtocol
-where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
+                                                  HTTPResponseBuilderType: HttpServerResponseBuilderProtocol,
+                                                  HandlerType: MiddlewareHandlerProtocol,
+                                                  DeserializationTransformType: DeserializationTransformProtocol>: MiddlewareHandlerProtocol
+where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType,
+DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType,
+DeserializationTransformType.ContextType == MiddlewareContext {
 
     public typealias Input = HTTPRequestType
     
-    public typealias Output = SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType>
+    public typealias Output = SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseBuilderType>
     
     let handler: HandlerType
-    let deserializationTransform: AnyDeserializationTransform<HTTPRequestType, InputType, MiddlewareContext>
+    let deserializationTransform: DeserializationTransformType
     
-    public init<DeserializationTransformType: DeserializationTransformProtocol>(
-                handler: HandlerType,
-                deserializationTransform: DeserializationTransformType)
-    where DeserializationTransformType.InputType == HTTPRequestType, DeserializationTransformType.OutputType == InputType,
-    DeserializationTransformType.ContextType == MiddlewareContext {
+    public init(handler: HandlerType,
+                deserializationTransform: DeserializationTransformType,
+                responseBuilderType: HTTPResponseBuilderType.Type) {
         self.handler = handler
-        self.deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
+        self.deserializationTransform = deserializationTransform
     }
     
     public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> Output {
@@ -43,6 +45,6 @@ where HandlerType.InputType == InputType, HandlerType.OutputType == OutputType {
         
         let serializationPhaseInput = try await handler.handle(input: deserializationOutput, context: context)
         
-        return SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType>(operationResponse: serializationPhaseInput)
+        return SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseBuilderType>(operationResponse: serializationPhaseInput)
     }
 }

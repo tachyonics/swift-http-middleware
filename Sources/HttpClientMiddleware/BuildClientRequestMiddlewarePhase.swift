@@ -14,7 +14,7 @@
 //  BuildClientRequestMiddlewarePhase.swift
 //  HttpClientMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public let BuildClientRequestPhaseId = "BuildClientRequest"
@@ -22,3 +22,4 @@ public let BuildClientRequestPhaseId = "BuildClientRequest"
 public typealias BuildClientRequestMiddlewarePhase<HTTPRequestType: HttpClientRequestProtocol,
                                                    HTTPResponseType: HttpClientResponseProtocol>
     = MiddlewarePhase<HttpClientRequestBuilder<HTTPRequestType>, HTTPResponseType>
+*/

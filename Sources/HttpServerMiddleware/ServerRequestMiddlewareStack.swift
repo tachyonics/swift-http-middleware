@@ -15,47 +15,45 @@
 //  HttpServerMiddleware
 //
 
-import HttpMiddleware
+import SwiftMiddleware
 
-public struct ServerRequestMiddlewareStack<HTTPRequestType: HttpServerRequestProtocol, HTTPResponseType: HttpServerResponseProtocol>: Sendable {
-    private var unknownErrorHandlerType: AnyUnknownErrorHandler<HTTPRequestType, HTTPResponseType, MiddlewareContext>
+public struct ServerRequestMiddlewareStack<MiddlewareType: MiddlewareProtocol,
+                                           HandlerType: MiddlewareHandlerProtocol,
+                                           UnknownErrorHandlerType: UnknownErrorHandlerProtocol>: Sendable
+where MiddlewareType.InputType: HttpServerRequestProtocol, MiddlewareType.OutputType: HttpServerResponseProtocol,
+HandlerType.InputType == MiddlewareType.InputType,
+HandlerType.OutputType == MiddlewareType.OutputType,
+UnknownErrorHandlerType.HTTPRequestType == MiddlewareType.InputType,
+UnknownErrorHandlerType.HTTPResponseType == MiddlewareType.OutputType,
+UnknownErrorHandlerType.ContextType == MiddlewareContext {
+    private let unknownErrorHandlerType: UnknownErrorHandlerType
+    private let handler: ComposedMiddlewarePhaseHandler<MiddlewareType.InputType,
+                                                        MiddlewareType.OutputType, MiddlewareType, HandlerType>
     
     /// returns the unique id for the operation stack as middleware
     public var id: String
-    public var buildPhase: BuildServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
-    public var finalizePhase: FinalizeServerResponseMiddlewarePhase<HTTPRequestType, HTTPResponseType>
     
-    public init<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
+    public init<MiddlewarePhaseType: MiddlewarePhaseProtocol>(
         id: String,
-        unknownErrorHandlerType: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,
-    UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
+        unknownErrorHandlerType: UnknownErrorHandlerType,
+        phase: MiddlewarePhaseType)
+    where MiddlewarePhaseType.InputType == MiddlewareType.InputType,
+    MiddlewarePhaseType.OutputType == MiddlewareType.OutputType,
+    MiddlewarePhaseType.MiddlewareType == MiddlewareType,
+    MiddlewarePhaseType.HandlerType == HandlerType {
         self.id = id
-        self.buildPhase = BuildServerResponseMiddlewarePhase(id: BuildServerResponsePhaseId)
-        self.finalizePhase = FinalizeServerResponseMiddlewarePhase(id: FinalizeServerResponsePhaseId)
-        self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
-    }
-    
-    public mutating func replacingUnknownErrorHandler<UnknownErrorHandlerType: UnknownErrorHandlerProtocol>(
-        unknownErrorHandlerType: UnknownErrorHandlerType)
-    where UnknownErrorHandlerType.HTTPRequestType == HTTPRequestType,
-          UnknownErrorHandlerType.HTTPResponseType == HTTPResponseType, UnknownErrorHandlerType.ContextType == MiddlewareContext {
-        self.unknownErrorHandlerType = unknownErrorHandlerType.eraseToAnyUnknownErrorHandler()
+        self.handler = ComposedMiddlewarePhaseHandler(next: phase.next, with: phase.with)
+        self.unknownErrorHandlerType = unknownErrorHandlerType
     }
     
     /// This execute will execute the stack and use your next as the last closure in the chain
-    public func handleMiddleware<HandlerType: MiddlewareHandlerProtocol>(
-                                             input: HTTPRequestType,
-                                             context: MiddlewareContext,
-                                             next: HandlerType) async -> HTTPResponseType
-    where HandlerType.InputType == HTTPRequestType, HandlerType.OutputType == HttpServerResponseBuilder<HTTPResponseType> {
-        let build = buildPhase.compose(next: next)
-        let finalize = finalizePhase.compose(next: FinalizeServerResponsePhaseHandler(handler: build))
-              
+    public func handleMiddleware(input: MiddlewareType.InputType,
+                                 context: MiddlewareContext) async -> MiddlewareType.OutputType {
         do {
-            return try await finalize.handle(input: input, context: context)
+            return try await self.handler.handle(input: input, context: context)
         } catch {
             return self.unknownErrorHandlerType.handle(request: input, error: error, context: context)
         }
     }
 }
+

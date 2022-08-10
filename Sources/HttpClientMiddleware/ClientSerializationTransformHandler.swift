@@ -14,7 +14,7 @@
 //  ClientSerializationTransformHandler.swift
 //  HttpClientMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public struct ClientSerializationTransformHandler<InputType, OutputType, HTTPRequestType: HttpClientRequestProtocol,
@@ -44,3 +44,4 @@ where HandlerType.InputType == SerializeClientRequestMiddlewarePhaseInput<InputT
         return try await self.deserializationTransform.transform(input: httpResponse, context: context)
     }
 }
+*/

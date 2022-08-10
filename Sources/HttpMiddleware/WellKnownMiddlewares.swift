@@ -15,6 +15,8 @@
 //  HttpClientMiddleware
 //
 
+import SwiftMiddleware
+
 public protocol LoggerMiddlewareProtocol: MiddlewareProtocol {
     
 }

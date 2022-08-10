@@ -14,7 +14,7 @@
 //  ClientRequestMiddlewareStack.swift
 //  HttpClientMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public struct ClientRequestMiddlewareStack<HTTPRequestType: HttpClientRequestProtocol, HTTPResponseType: HttpClientResponseProtocol> {
@@ -52,3 +52,4 @@ public struct ClientRequestMiddlewareStack<HTTPRequestType: HttpClientRequestPro
         return input
     }
 }
+*/

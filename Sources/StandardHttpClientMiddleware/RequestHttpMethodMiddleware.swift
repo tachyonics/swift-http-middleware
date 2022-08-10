@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import SwiftMiddleware
 import HttpMiddleware
 import HttpClientMiddleware
 

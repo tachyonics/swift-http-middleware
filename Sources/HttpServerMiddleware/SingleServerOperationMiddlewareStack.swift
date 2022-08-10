@@ -14,7 +14,7 @@
 //  SingleServerOperationMiddlewareStack.swift
 //  HttpServerMiddleware
 //
-
+/*
 import HttpMiddleware
 
 public let InitializePhaseId = "Initialize"
@@ -47,4 +47,4 @@ public struct SingleServerOperationMiddlewareStack<InputType, OutputType,
     DeserializationTransformType.ContextType == MiddlewareContext {
         self._deserializationTransform = deserializationTransform.eraseToAnyDeserializationTransform()
     }
-}
+}*/
