@@ -26,7 +26,7 @@ public enum RequestRetryerError<HTTPResponseType: HttpClientResponseProtocol>: E
 }
 
 public struct RequestRetryerMiddleware<HTTPRequestType: HttpClientRequestProtocol,
-                                       HTTPResponseType: HttpClientResponseProtocol>: RequestRetryerMiddlewareProtocol {
+                                       HTTPResponseType: HttpClientResponseProtocol>: MiddlewareProtocol {
     public typealias InputType = HTTPRequestType
     public typealias OutputType = HTTPResponseType
     

@@ -15,7 +15,6 @@
 //  HttpMiddleware
 //
 
-#if compiler(<5.7)
 public protocol DeserializationTransformProtocol: Sendable {
     associatedtype InputType
     associatedtype OutputType
@@ -24,25 +23,3 @@ public protocol DeserializationTransformProtocol: Sendable {
     func transform(
         input: InputType, context: ContextType) async throws -> OutputType
 }
-
-extension DeserializationTransformProtocol {
-    public func eraseToAnyDeserializationTransform() -> AnyDeserializationTransform<InputType, OutputType, ContextType> {
-        return AnyDeserializationTransform(self)
-    }
-}
-#else
-public protocol DeserializationTransformProtocol<InputType, OutputType, ContextType>: Sendable {
-    associatedtype InputType
-    associatedtype OutputType
-    associatedtype ContextType
-    
-    func transform(
-        input: InputType, context: ContextType) async throws -> OutputType
-}
-
-extension DeserializationTransformProtocol {
-    public func eraseToAnyDeserializationTransform() -> any DeserializationTransformProtocol<InputType, OutputType, ContextType> {
-        return self
-    }
-}
-#endif

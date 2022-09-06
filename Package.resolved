@@ -8,6 +8,15 @@
         "revision" : "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
         "version" : "1.4.2"
       }
+    },
+    {
+      "identity" : "swift-middleware",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tachyonics/swift-middleware.git",
+      "state" : {
+        "branch" : "static_poc",
+        "revision" : "524c5badcf8fb6fe59d8fc12ae9e94b4b834e8bd"
+      }
     }
   ],
   "version" : 2

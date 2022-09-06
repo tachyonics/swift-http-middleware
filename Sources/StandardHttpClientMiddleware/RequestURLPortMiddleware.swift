@@ -17,7 +17,7 @@ import HttpMiddleware
 import HttpClientMiddleware
 
 public struct RequestURLPortMiddleware<HTTPRequestType: HttpClientRequestProtocol,
-                                               HTTPResponseType: HttpClientResponseProtocol>: RequestURLPortMiddlewareProtocol {
+                                               HTTPResponseType: HttpClientResponseProtocol>: MiddlewareProtocol {
     public typealias InputType = HttpClientRequestBuilder<HTTPRequestType>
     public typealias OutputType = HTTPResponseType
     

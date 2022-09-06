@@ -14,53 +14,41 @@
 //  ServerRouterProtocol.swift
 //  HttpServerMiddleware
 //
-/*
-import HttpMiddleware
 
-public struct ServerRouterOutput<HTTPRequestType: HttpServerRequestProtocol,
-                                 HTTPResponseType: HttpServerResponseProtocol> {
-    public let httpRequest: HTTPRequestType
-    public let handler: AnyMiddlewareHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>
+import SwiftMiddleware
+
+public protocol ServerRouterOutputProtocol<InputType, OutputType> {
+    associatedtype InputType: HttpServerRequestProtocol
+    associatedtype OutputType: HttpServerResponseBuilderProtocol
+    associatedtype HandlerType: MiddlewareHandlerProtocol<InputType, OutputType, MiddlewareContext>
     
-    public init(httpRequest: HTTPRequestType,
-                handler: AnyMiddlewareHandler<HTTPRequestType, HttpServerResponseBuilder<HTTPResponseType>>) {
+    var httpRequest: HandlerType.InputType { get }
+    var handler: HandlerType { get }
+}
+
+public struct ServerRouterOutput<HandlerType: MiddlewareHandlerProtocol>: ServerRouterOutputProtocol
+where HandlerType.InputType: HttpServerRequestProtocol,
+      HandlerType.OutputType: HttpServerResponseBuilderProtocol {
+    public typealias InputType = HandlerType.InputType
+    public typealias OutputType = HandlerType.OutputType
+    
+    public let httpRequest: HandlerType.InputType
+    public let handler: HandlerType
+    
+    public init(httpRequest: HandlerType.InputType,
+                handler: HandlerType) {
         self.httpRequest = httpRequest
         self.handler = handler
     }
 }
 
-#if compiler(<5.7)
-public protocol ServerRouterProtocol {
+public protocol ServerRouterProtocol: Sendable {
     associatedtype InputHTTPRequestType: HttpServerRequestProtocol
     associatedtype OutputHTTPRequestType: HttpServerRequestProtocol
     associatedtype HTTPResponseType: HttpServerResponseProtocol
-    associatedtype ContextType
     
     @Sendable
     func select(
         httpRequest: InputHTTPRequestType,
-        context: ContextType) async throws -> ServerRouterOutput<OutputHTTPRequestType, HTTPResponseType>
+        context: MiddlewareContext) async throws -> any ServerRouterOutputProtocol<OutputHTTPRequestType, HTTPResponseType>
 }
-
-extension ServerRouterProtocol {
-    public func eraseToAnyServerRouter() -> AnyServerRouter<InputHTTPRequestType, OutputHTTPRequestType, HTTPResponseType, ContextType> {
-        return AnyServerRouter(self)
-    }
-}
-#else
-public protocol ServerRouterProtocol {
-    associatedtype HTTPResponseType: HttpClientResponseProtocol
-    associatedtype OutputType
-    
-    @Sendable
-    func select(
-        httpRequest: HTTPRequestType) async throws -> AnyHandler<HTTPRequestType, HTTPResponseType>
-}
-
-extension ServerRouterProtocol {
-    public func eraseToAnyServerRouter() -> any AnyServerRouter<HTTPResponseType, OutputType> {
-        return self
-    }
-}
-#endif
-*/

@@ -16,27 +16,20 @@
 
 import SwiftMiddleware
 
-public struct ServerOperationHandler<HandlerType: MiddlewareHandlerProtocol, HTTPRequestType: HttpServerRequestProtocol,
-                                     HTTPResponseType: HttpServerResponseProtocol>: MiddlewareHandlerProtocol {
-    private let next: HandlerType
-    private let middleware: SingleServerOperationMiddlewareStack<HandlerType.InputType, HandlerType.OutputType,
-                                                                 HTTPRequestType, HTTPResponseType>
+public struct ServerOperationHandler<PhaseType: MiddlewarePhaseProtocol, HTTPRequestType: HttpServerRequestProtocol,
+                                     HTTPResponseType: HttpServerResponseProtocol>: MiddlewareHandlerProtocol
+where PhaseType.InputType == HTTPRequestType, PhaseType.OutputType: HttpServerResponseBuilderProtocol,
+PhaseType.OutputType.HTTPResponseType == HTTPResponseType {
+    private let phase: PhaseType
     
-    public init(middleware: SingleServerOperationMiddlewareStack<HandlerType.InputType, HandlerType.OutputType, HTTPRequestType, HTTPResponseType>,
-                next: HandlerType) {
-        self.next = next
-        self.middleware = middleware
+    public init(phase: PhaseType) {
+        self.phase = phase
     }
     
-    public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> HttpServerResponseBuilder<HTTPResponseType> {
-        let initialize = middleware.initializePhase.compose(next: next)
-        let transform = ServerSerializationTransformHandler<HandlerType.InputType, HandlerType.OutputType, HTTPRequestType, HTTPResponseType,
-                                                                AnyMiddlewareHandler<HandlerType.InputType, HandlerType.OutputType>>(
-                                                                    handler: initialize, deserializationTransform: middleware._deserializationTransform)
-        let serializeInput = middleware.serializePhase.compose(next: transform)
-        let handlerOutput = SerializeServerResponsePhaseHandler(handler: serializeInput)
+    public func handle(input: HTTPRequestType, context: MiddlewareContext) async throws -> PhaseType.OutputType {
+        let phaseHandler = ComposedMiddlewarePhaseHandler(next: phase.next, with: phase.with)
         
-        return try await handlerOutput.handle(input: input, context: context)
+        return try await phaseHandler.handle(input: input, context: context)
     }
 }
 

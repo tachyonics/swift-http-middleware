@@ -18,20 +18,22 @@
 import SwiftMiddleware
 import HttpMiddleware
 
-public extension MiddlewarePhaseProtocol {
-    func startingSerializeServerResponsePhase<MiddlewareType: MiddlewareProtocol,
-                                              DeserializationTransformType: DeserializationTransformProtocol,
-                                              HttpRequestType: HttpServerRequestProtocol,
-                                              ResponseBuilderType: HttpServerResponseBuilderProtocol>(
+public extension Middlewares {
+    func createSerializeServerResponsePhase<PhaseType: MiddlewarePhaseProtocol,
+                                            MiddlewareType: MiddlewareProtocol,
+                                            DeserializationTransformType: DeserializationTransformProtocol,
+                                            HttpRequestType: HttpServerRequestProtocol,
+                                            ResponseBuilderType: HttpServerResponseBuilderProtocol>(
+        initializePhase: PhaseType,
         with middleware: MiddlewareType,
         deserializationTransform: DeserializationTransformType)
     -> some MiddlewarePhaseProtocol
     where MiddlewareType.InputType == HttpRequestType,
-    MiddlewareType.OutputType == SerializeServerResponseMiddlewarePhaseOutput<OutputType, ResponseBuilderType>,
+    MiddlewareType.OutputType == SerializeServerResponseMiddlewarePhaseOutput<PhaseType.OutputType, ResponseBuilderType>,
     DeserializationTransformType.InputType == HttpRequestType,
-    DeserializationTransformType.OutputType == InputType,
+    DeserializationTransformType.OutputType == PhaseType.InputType,
     DeserializationTransformType.ContextType == MiddlewareContext {
-        let oldPhaseHandler = ComposedMiddlewarePhaseHandler(next: self.next, with: self.with)
+        let oldPhaseHandler = ComposedMiddlewarePhaseHandler(next: initializePhase.next, with: initializePhase.with)
         
         let transform = ServerSerializationTransformHandler(handler: oldPhaseHandler,
                                                             deserializationTransform: deserializationTransform,

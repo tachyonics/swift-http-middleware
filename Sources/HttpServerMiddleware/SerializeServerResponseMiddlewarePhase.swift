@@ -16,17 +16,7 @@
 //
 
 import SwiftMiddleware
-/*
-import SwiftMiddleware
-import HttpMiddleware
 
-public let SerializeServerResponsePhaseId = "SerializeServerResponse"
-
-public typealias SerializeServerResponseMiddlewarePhase<OutputType,
-                                               HTTPRequestType: HttpServerRequestProtocol,
-                                               HTTPResponseType: HttpServerResponseProtocol>
-    = MiddlewarePhase<HTTPRequestType, SerializeServerResponseMiddlewarePhaseOutput<OutputType, HTTPResponseType>>
-*/
 public struct SerializeServerResponsePhaseHandler<OutputType,
                                                   HTTPRequestType: HttpServerRequestProtocol,
                                                   HTTPResponseBuilderType: HttpServerResponseBuilderProtocol,

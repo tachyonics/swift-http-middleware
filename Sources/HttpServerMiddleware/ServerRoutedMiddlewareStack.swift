@@ -14,6 +14,55 @@
 //  ServerRoutedMiddlewareStack.swift
 //  HttpServerMiddleware
 //
+
+import SwiftMiddleware
+
+public struct ServerRoutedMiddlewareStack<MiddlewareType: MiddlewareProtocol,
+                                          HandlerType: MiddlewareHandlerProtocol,
+                                          ServerRouterType: ServerRouterProtocol,
+                                          UnknownErrorHandlerType: UnknownErrorHandlerProtocol>: Sendable
+where MiddlewareType.InputType: HttpServerRequestProtocol, MiddlewareType.OutputType: HttpServerResponseProtocol,
+HandlerType.InputType == MiddlewareType.InputType,
+HandlerType.OutputType == MiddlewareType.OutputType,
+UnknownErrorHandlerType.HTTPRequestType == MiddlewareType.InputType,
+UnknownErrorHandlerType.HTTPResponseType == MiddlewareType.OutputType,
+UnknownErrorHandlerType.ContextType == MiddlewareContext,
+ServerRouterType.InputHTTPRequestType == MiddlewareType.InputType,
+ServerRouterType.HTTPResponseType == MiddlewareType.OutputType {
+    private let router: ServerRouterType
+    private let unknownErrorHandlerType: UnknownErrorHandlerType
+    private let handler: ComposedMiddlewarePhaseHandler<MiddlewareType.InputType,
+                                                        MiddlewareType.OutputType, MiddlewareType, HandlerType>
+    
+    /// returns the unique id for the operation stack as middleware
+    public var id: String
+    
+    public init<MiddlewarePhaseType: MiddlewarePhaseProtocol>(
+        id: String,
+        router: ServerRouterType,
+        unknownErrorHandlerType: UnknownErrorHandlerType,
+        phase: MiddlewarePhaseType)
+    where MiddlewarePhaseType.InputType == MiddlewareType.InputType,
+    MiddlewarePhaseType.OutputType == MiddlewareType.OutputType,
+    MiddlewarePhaseType.MiddlewareType == MiddlewareType,
+    MiddlewarePhaseType.HandlerType == HandlerType {
+        self.id = id
+        self.handler = ComposedMiddlewarePhaseHandler(next: phase.next, with: phase.with)
+        self.router = router
+        self.unknownErrorHandlerType = unknownErrorHandlerType
+    }
+    
+    /// This execute will execute the stack and use your next as the last closure in the chain
+    public func handleMiddleware(input: MiddlewareType.InputType,
+                                 context: MiddlewareContext) async -> MiddlewareType.OutputType {
+        do {
+            return try await self.handler.handle(input: input, context: context)
+        } catch {
+            return self.unknownErrorHandlerType.handle(request: input, error: error, context: context)
+        }
+    }
+}
+
 /*
 import HttpMiddleware
 

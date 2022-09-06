@@ -17,14 +17,16 @@
 
 import SwiftMiddleware
 
-public extension MiddlewarePhaseProtocol
-where InputType: HttpServerRequestProtocol, OutputType: HttpServerResponseBuilderProtocol {
-    func startingFinalisePhase<MiddlewareType: MiddlewareProtocol>(with middleware: MiddlewareType)
+public extension Middlewares {
+    func createFinalisePhase<PhaseType: MiddlewarePhaseProtocol,
+                             MiddlewareType: MiddlewareProtocol>(buildPhase: PhaseType,
+                                                                 with middleware: MiddlewareType)
     -> some MiddlewarePhaseProtocol
-    where MiddlewareType.InputType == InputType, MiddlewareType.OutputType == OutputType.HTTPResponseType {
-        let oldPhaseHandler = ComposedMiddlewarePhaseHandler(next: self.next, with: self.with)
+    where MiddlewareType.InputType == PhaseType.InputType, MiddlewareType.OutputType == PhaseType.OutputType.HTTPResponseType,
+    PhaseType.InputType: HttpServerRequestProtocol, PhaseType.OutputType: HttpServerResponseBuilderProtocol {
+        let buildPhaseHandler = ComposedMiddlewarePhaseHandler(next: buildPhase.next, with: buildPhase.with)
         
-        let phaseHandler = FinalizeServerResponsePhaseHandler(handler: oldPhaseHandler)
+        let phaseHandler = FinalizeServerResponsePhaseHandler(handler: buildPhaseHandler)
         
         return MiddlewarePhase(next: phaseHandler, with: middleware)
     }
